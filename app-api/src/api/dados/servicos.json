@@ -1,0 +1,14 @@
+[
+    {
+        "descricaoServico": "Troca de óleo",
+        "precoServico": 18.15
+    },
+    {
+        "descricaoServico": "Limpeza",
+        "precoServico": 35.69
+    },
+    {
+        "descricaoServico": "Sangria de freios",
+        "precoServico": 20.0
+    }
+]

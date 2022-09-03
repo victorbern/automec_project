@@ -1,0 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Roboto:wght@700&display=swap');
+
+footer {
+    padding: 40px 0;
+    background-color: #0D0F36;
+    width: 100%;
+    margin-top: 2.5rem;
+  }
+
+footer .logoFooter{
+    font-size: 32px;
+}
+
+footer .logoFooter img{
+    margin-right: 10px;
+}
+
+footer p {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #ffffff;
+    font-family: 'Roboto', sans-serif;
+}
+footer .copyright {
+    padding-top: 32px;
+    font-size: 80%;
+  }

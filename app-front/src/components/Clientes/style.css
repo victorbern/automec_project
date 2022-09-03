@@ -1,0 +1,189 @@
+
+.btn-incluir {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 12rem;
+    height: 40px;
+    background-color: #353DDB !important;
+    border-color: #353DDB !important;
+    float: right;
+    margin-right: 0;
+    margin-top: 2rem;
+    margin-bottom: 3rem;
+}
+
+.btnOk{
+    width: 11rem;
+    height: 40px;
+    background-color: #353DDB !important;
+    border-color: #353DDB !important;
+    border-radius: 5px;
+    color: #ffffff;
+}
+
+.btnOkDel{
+    width: 11rem;
+    height: 40px;
+    background-color: #DB3535 !important;
+    border-color: #DB3535 !important;
+    border-radius: 5px;
+    color: #ffffff;
+}
+
+.footer {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+div.titulo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    margin-top: 4rem;
+}
+  
+  div.titulo h2 {
+    font-size: 24px;
+    color: #0D0F36;
+}
+  
+  div.titulo .line {
+    width: 250px;
+    height: 5px;
+    background: #0D0F36;
+}
+
+.tabela {
+  border-radius: 10px 10px 10px 10px ;
+}
+
+table {
+  width: 100%;
+  border-radius: 10px 10px 10px 10px ;
+  background-color: white;
+  overflow: hidden;
+  margin-top: 2.5rem;
+}
+
+table thead tr {
+  background-color: #0D0F36;
+  color: white;
+  text-align: left;
+}
+
+table tbody tr:hover{
+  cursor: pointer;
+  background-color: #0d0f3610;
+}
+
+table tbody tr:last-child{
+  border-bottom: 5px solid #0D0F36;
+}
+
+@media screen and (max-width: 780px) {
+ 
+  table {
+    box-shadow: none;
+  }
+
+  table tbody{
+    padding: 0 16px;
+  }
+   table thead{
+     display: none;
+     color: #000000;
+   }
+
+   table, tbody, table tbody tr {
+     display: block;width: 100%;
+      border-bottom: white;
+    }
+   table tbody tr th::before, table tbody tr td::before{
+     content: attr(data-title); 
+     display: block;
+     font-weight: 600;
+     font-size: 80%;
+     color: #000000;
+    }
+
+    table tbody tr td:last-child {
+      border-bottom: 2px solid #0D0F36;
+      width: 100%;
+    }
+
+    table tbody tr th,
+    table tbody tr td {
+      display: block;
+      width: 50%;
+      float: left;
+      font-size: 100%;
+      background-color: white;
+    }
+    table tbody tr {
+      background-color: white;
+      border-radius: 5px;
+      border-top: 5px solid #0D0F36;
+      margin-bottom: 16px;
+      float: left;
+      clear: both;
+    }
+    .content-table tbody tr:last-of-type {
+      border-bottom:white;
+    }
+    .content-table {
+      background-color:#fff5e1;
+      width: 100%;
+    }
+
+    table tbody tr:hover {
+      background-color: #0d0f3610;
+    }
+
+    .tabela {
+      border-bottom: none;
+      border-radius: none ;
+    }
+
+    table tbody tr:last-child{
+      border-bottom: white;
+    }
+
+}
+
+.pesquisar {
+  display: flex;
+  float: left;
+  margin-top: 2rem;
+  margin-bottom: 3rem;
+}
+
+.btn-pesquisar {
+  margin-left: 1rem;
+  color: #0D0F36 !important;
+  border: 3px solid #0D0F36 !important;
+  font-weight: bold !important;
+  box-shadow: none !important;
+  background-color: white !important;
+}
+
+.btn-pesquisar:hover {
+  background-color: #353ddb1b !important ;
+}
+
+.btn-pesquisar:active {
+  background-color: #353ddb1b !important ;
+}
+
+.pesquisar .input-pesquisar {
+  border: 3px solid #353DDB !important;
+}
+
+.pesquisar .input-pesquisar::placeholder {
+  color:#353ddb78 !important;
+  font-weight: bold;
+}

@@ -1,0 +1,18 @@
+[
+    {
+        "nomeFuncionario": "Martin Rodrigo Anderson Nunes",
+        "isAtivo": true,
+        "funcao": "mecânico"
+    },
+    {
+        "nomeFuncionario": "Francisco Juan Elias Nunes",
+        "isAtivo": true,
+        "funcao": "mecânico"
+    },
+    {
+        "nomeFuncionario": "Luan Bryan Rodrigues",
+        "isAtivo": true,
+        "funcao": "mecânico"
+    }
+]
+    

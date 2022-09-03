@@ -1,0 +1,23 @@
+[
+    {
+        "codigoBarras": "25164531",
+        "descricao": "Óleo Lubrificante",
+        "valorCusto": 36.98,
+        "quantidade": 16,
+        "precoVenda": 42.18
+    },
+    {
+        "codigoBarras": "31649564",
+        "descricao": "Óleo para motor",
+        "valorCusto": 18.96,
+        "quantidade": 45,
+        "precoVenda": 36.92
+    },
+    {
+        "codigoBarras": "13469542",
+        "descricao": "Lava Auto Super Concentrado",
+        "valorCusto": 19.69,
+        "quantidade": 69,
+        "precoVenda": 36.14
+    }
+]

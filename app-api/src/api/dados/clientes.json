@@ -1,0 +1,90 @@
+[
+    {
+        "nomeCliente": "Bento Diego Manoel Barros",
+        "cpfCnpj": "94336914826",
+        "celularCliente": "95994944203",
+        "cep": "69312307",
+        "endereco": "Rua Raimundo Penafort",
+        "numero": "583",
+        "cidade": "Boa Vista",
+        "uf": "RR",
+        "complemento": "Asa Branca"
+    },
+    {
+        "nomeCliente": "Marli Sueli Castro",
+        "cpfCnpj": "15111254544",
+        "celularCliente": "62981034759",
+        "cep": "74355788",
+        "endereco": "Rua Vinícius de Aquino",
+        "numero": "410",
+        "cidade": "Goiânia",
+        "uf": "GO",
+        "complemento": "Setor Orientville"
+    },
+    {
+        "nomeCliente": "Carolina Liz Rosa Duarte",
+        "cpfCnpj": "16821522782",
+        "celularCliente": "67985344414",
+        "cep": "79118210",
+        "endereco": "Rua Marquês de Maricá",
+        "numero": "893",
+        "cidade": "Campo Grande",
+        "uf": "MS",
+        "complemento": "Bairro São Francisco"
+    },
+    {
+        "nomeCliente": "Matheus Davi Porto",
+        "cpfCnpj": "40762197080",
+        "celularCliente": "81988531790",
+        "cep": "53421347",
+        "endereco": "Travessa Setenta e Três",
+        "numero": "137",
+        "cidade": "Paulista",
+        "uf": "PE",
+        "complemento": "Maranguape II"
+    },
+    {
+        "nomeCliente": "Lucas Nathan Figueiredo",
+        "cpfCnpj": "43885919800",
+        "celularCliente": "11986493322",
+        "cep": "05624040",
+        "endereco": "Rua Gonçalo Pires",
+        "numero": "559",
+        "cidade": "São Paulo",
+        "uf": "SP",
+        "complemento": "Vila Morse"
+    },
+    {
+        "nomeCliente": "Olivia Débora Vitória Nascimento",
+        "cpfCnpj": "81997862301",
+        "celularCliente": "68984194060",
+        "cep": "69905232",
+        "endereco": "Avenida Epaminondas Jácome",
+        "numero": "218",
+        "cidade": "Rio Branco",
+        "uf": "AC",
+        "complemento": "Cadeia Velha"
+    },
+    {
+        "nomeCliente": "Pietra e Louise Entregas Expressas Ltda",
+        "cpfCnpj": "27279793000186",
+        "celularCliente": "18985538620",
+        "cep": "19013900",
+        "endereco": "Rua Antônio Rodrigues 1024",
+        "numero": "469",
+        "cidade": "Presidente Prudente",
+        "uf": "SP",
+        "complemento": "Vila Industrial"
+    },
+    {
+        "nomeCliente": "Nelson e Ayla Mudanças Ltda",
+        "cpfCnpj": "07122848000132",
+        "celularCliente": "11989276424",
+        "cep": "04635022",
+        "endereco": "Rua Palacete das Águias",
+        "numero": "341",
+        "cidade": "São Paulo",
+        "uf": "SP",
+        "complemento": "Vila Alexandria"
+    }
+]

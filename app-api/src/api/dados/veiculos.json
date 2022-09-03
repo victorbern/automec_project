@@ -1,0 +1,56 @@
+[
+    {
+        "placaVeiculo": "CAK3945",
+        "marca": "Audi",
+        "modelo": "A1",
+        "ano": 2011,
+        "capacidadeOleo": 4,
+        "cor": "Prata",
+        "veiculo_idCliente": 1
+    },
+    {
+        "placaVeiculo": "KDD7694",
+        "marca": "Chery",
+        "modelo": "Celer Sedan",
+        "ano": 2015,
+        "capacidadeOleo": 4,
+        "cor": "Branco",
+        "veiculo_idCliente": 2
+    },
+    {
+        "placaVeiculo": "APZ5450",
+        "marca": "Porshe",
+        "modelo": "Cabriolet Carrera",
+        "ano": 2022,
+        "capacidadeOleo": 5,
+        "cor": "Azul",
+        "veiculo_idCliente": 3
+    },
+    {
+        "placaVeiculo": "HPY4890",
+        "marca": "Nissan",
+        "modelo": "Frontier",
+        "ano": 2020,
+        "capacidadeOleo": 4,
+        "cor": "Branco",
+        "veiculo_idCliente": 4
+    },
+    {
+        "placaVeiculo": "CYS5439",
+        "marca": "Fiat",
+        "modelo": "Argo",
+        "ano": 2022,
+        "capacidadeOleo": 5,
+        "cor": "Branco",
+        "veiculo_idCliente": 5
+    },
+    {
+        "placaVeiculo": "LWL6723",
+        "marca": "Fiat",
+        "modelo": "Cronos",
+        "ano": 2021,
+        "capacidadeOleo": 4,
+        "cor": "Vermelho",
+        "veiculo_idCliente": 5
+    }
+]
