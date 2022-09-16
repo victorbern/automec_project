@@ -1,0 +1,972 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/SANTOSAPARECIDO/API-DSW6/1.0.0
+info:
+  description: This is a simple API
+  version: "1.0.0"
+  title: Simple Inventory API
+  contact:
+    email: you@your-company.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name:  clientes
+    description: Funções de clientes
+  - name: veiculos
+    description: Funções de veículos
+  - name: funcionarios
+    description: Funções de funcionarios
+  - name: produtos
+    description: Funções de produtos
+  - name: ordem-servico
+    description: Funções de ordem-servico
+  - name: servicos
+    description: Funções de servicos
+paths:
+  /clientes:
+    get:
+      tags:
+        - clientes
+      summary: listagem clientes
+      description: traz uma  lista com todos os clientes cadastrados no sistema
+      responses:
+        '200':
+          description: realizou a listagem de  clientes com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '400':
+          description: sintaxe inválida
+
+          
+  /cliente:
+    post:
+      tags:
+        - clientes
+      summary: adicionar um cliente
+      description: a cada atriuição de um novo cliente é atribuido um  id automaticamente
+      responses:
+        '201':
+          description: novo cliente cadastrado
+        '400':
+          description: sintaxe inválida
+        '409':
+          description: cliente já cadastrado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome:
+                  type: string
+                cpf/cnpj:
+                  type: string
+                celular:
+                  type: string
+                telefone:
+                  type: string
+                cep:
+                  type: string
+                endereco:
+                  type: string
+                n°:
+                  type: integer
+                bairro:
+                  type: string
+                cidade:
+                  type: string
+                uf:
+                  type: string
+                complemento:
+                  type: string
+        description: cliente cadastrado
+        
+  /cliente/{id}:
+    get:
+      summary: Traz um usuário especifico pelo  ID
+      tags:
+        - clientes
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+      responses:
+        '200':
+          description: trouxe o cliente
+            
+    put:
+      summary: Altera um cliente
+      tags:
+        - clientes
+      parameters:
+      - name: idCliente
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+          
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome:
+                  type: string
+                cpf/cnpj:
+                  type: string
+                celular:
+                  type: string
+                telefone:
+                  type: string
+                cep:
+                  type: string
+                endereco:
+                  type: string
+                n°:
+                  type: integer
+                bairro:
+                  type: string
+                cidade:
+                  type: string
+                uf:
+                  type: string
+                complemento:
+                  type: string
+      responses:
+        '200':
+          description: alterou o cliente
+          
+    delete:
+      summary: deletar um cliente definido pelo ID
+      tags:
+        - clientes
+      parameters:
+      - name: idCliente
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+      responses:
+        '200':
+          description: deletou o cliente
+
+  /clientes/{valor}:
+    get:
+      summary: Traz um usuário especifico por um valor
+      tags:
+        - clientes
+      parameters:
+      - name: valor
+        in: path
+        required: true
+        schema:
+          type: string
+          minimum: 1
+      responses:
+        '200':
+          description: trouxe o cliente
+
+  /veiculos:
+    get:
+      tags:
+      - veiculos
+      summary: listagem veiculos
+      description: traz uma  lista com todos os veiculos cadastrados no sistema
+      responses:
+        '200':
+          description: realizou a listagem de  veiculos com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '400':
+          description: sintaxe inválida
+
+  /veiculo:
+    post:
+      tags:
+        - veiculo
+      summary: adicionar um veiculo
+      responses:
+        '201':
+          description: novo veiculo cadastrado
+        '400':
+          description: sintaxe inválida
+        '409':
+          description: veiculo já cadastrado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                placa:
+                  type: string
+                marca:
+                  type: string
+                modelo:
+                  type: string
+                ano:
+                  type: integer
+                capacidadeOleo:
+                  type: string
+                cor:
+                  type: string
+        description: veiculo cadastrado
+        
+  /veiculo/{placa}:
+    get:
+      summary: Traz um veiculo especifico pelo  placa
+      tags:
+        - veiculos
+      parameters:
+      - name: placa
+        in: path
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 8
+          minimum: 1
+      responses:
+        '200':
+          description: trouxe o veiculo
+            
+    put:
+      summary: Altera um veiculo
+      tags:
+        - veiculos
+      parameters:
+      - name: placa
+        in: path
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 8
+          minimum: 1
+          
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                placa:
+                  type: string
+                marca:
+                  type: string
+                modelo:
+                  type: string
+                ano:
+                  type: integer
+                capacidadeOleo:
+                  type: string
+                cor:
+                  type: string
+      responses:
+        '200':
+          description: alterou o veiculo
+          
+    delete:
+      summary: deletar um veiculo definido pela placa
+      tags:
+        - veiculos
+      parameters:
+      - name: placa
+        in: path
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 8
+          minimum: 1
+      responses:
+        '200':
+          description: deletou o veiculo
+
+  /veiculos/{valor}:
+    get:
+      summary: Traz um veiculo especifico por um valor
+      tags:
+        - veiculos
+      parameters:
+      - name: valor
+        in: path
+        required: true
+        schema:
+          type: string
+          minimum: 1
+      responses:
+        '200':
+          description: trouxe o veiculo
+
+  /funcionarios:
+    get:
+      tags:
+      - funcionarios
+      summary: listagem funcionarios
+      description: traz uma  lista com todos os funcionarios cadastrados no sistema
+      responses:
+        '200':
+          description: realizou a listagem de  funcionarios com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '400':
+          description: sintaxe inválida
+
+  /funcionario:
+    post:
+      tags:
+        - funcionarios
+      summary: adicionar um funcionario
+      description: a cada atriuição de um novo funcionario é atribuido um  id automaticamente
+      responses:
+        '201':
+          description: novo funcionario cadastrado
+        '400':
+          description: sintaxe inválida
+        '409':
+          description: funcionario já cadastrado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nomeFunc:
+                  type: string
+                funcao:
+                  type: string
+                ativo:
+                  type: boolean
+        description: funcionario cadastrado
+        
+  /funcionario/{id}:
+    get:
+      summary: Traz um funcionario especifico pelo id
+      tags:
+        - funcionarios
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+      responses:
+        '200':
+          description: trouxe o funcionario
+            
+    put:
+      summary: Altera um funcionario
+      tags:
+        - funcionarios
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+          
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nomeFunc:
+                  type: string
+                funcao:
+                  type: string
+                ativo:
+                  type: boolean
+      responses:
+        '200':
+          description: alterou o funcionario
+          
+    delete:
+      summary: deletar um funcionario definido pelo id
+      tags:
+        - funcionarios
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+      responses:
+        '200':
+          description: deletou o funcionario
+
+  /funcionarios/{valor}:
+    get:
+      summary: Traz um usuário especifico por um valor
+      tags:
+        - clientes
+      parameters:
+      - name: valor
+        in: path
+        required: true
+        schema:
+          type: string
+          minimum: 1
+      responses:
+        '200':
+          description: trouxe o funcionario
+
+  
+  /produtos:
+    get:
+      tags:
+      - produtos
+      summary: listagem produtos
+      description: traz uma  lista com todos os produtos cadastrados no sistema
+      responses:
+        '200':
+          description: realizou a listagem de produtos com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '400':
+          description: sintaxe inválida
+
+  /produto:
+    post:
+      tags:
+        - produtos
+      summary: adicionar um produto
+      description: a cada atriuição de um novo produto é atribuido um id automaticamente
+      responses:
+        '201':
+          description: novo produto cadastrado
+        '400':
+          description: sintaxe inválida
+        '409':
+          description: produto já cadastrado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                codDeBarra:
+                  type: string
+                descricao:
+                  type: string
+                valorCusto:
+                  type: integer
+                quantidade:
+                  type: integer
+                precoVenda:
+                  type: integer
+        description: produto cadastrado
+        
+  /produto/{id}:
+    get:
+      summary: Traz um produto especifico pelo id
+      tags:
+        - produtos
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+      responses:
+        '200':
+          description: trouxe o produto
+            
+    put:
+      summary: Altera um produto
+      tags:
+        - produtos
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+          
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                codDeBarra:
+                  type: string
+                descricao:
+                  type: string
+                valorCusto:
+                  type: integer
+                quantidade:
+                  type: integer
+                precoVenda:
+                  type: integer
+      responses:
+        '200':
+          description: alterou o produto
+          
+    delete:
+      summary: deletar um produto definido pelo id
+      tags:
+        - produtos
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+      responses:
+        '200':
+          description: deletou o produto
+
+  /alterar-estoque/{valor}:
+    put:
+      summary: Altera o estoque de produtos
+      tags:
+        - produtos
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: array
+          minimum: 1
+          
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                valorCusto:
+                  type: integer
+                quantidade:
+                  type: integer
+                idProduto:
+                  type: integer
+      responses:
+        '200':
+          description: alterou o estoque
+
+
+  /ordens-servicos:
+    get:
+      tags:
+      - ordem-servico
+      summary: listagem de ordens-servico
+      description: traz uma  lista com todas as  ordens-servico cadastradas no sistema
+      responses:
+        '200':
+          description: realizou a listagem de ordens-servico com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '400':
+          description: sintaxe inválida
+
+  /ordem-servico:
+    post:
+      tags:
+        - ordem-servico
+      summary: adicionar uma ordem-servico
+      description: a cada atriuição de uma nova ordem-servico é atribuido um id automaticamente
+      responses:
+        '201':
+          description: novo ordem-servico cadastrada
+        '400':
+          description: sintaxe inválida
+        '409':
+          description: ordem-servico já cadastrado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                produtos:
+                  type: array
+                funcionario:
+                  type: integer
+                total:
+                  type: integer
+                cliente:
+                  type: integer
+                km:
+                  type: integer
+                finalizada:
+                  type: boolean
+                isPaga:
+                  type: boolean
+        description: ordem-servico cadastrado
+        
+  /ordem-servico/{id}:
+    get:
+      summary: Traz uma ordem-servico especifica pelo id
+      tags:
+        - ordem-servico
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+      responses:
+        '200':
+          description: trouxe a ordem-servico
+            
+    put:
+      summary: Altera uma ordem-servico
+      tags:
+        - ordem-servico
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+          
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                produtos:
+                  type: array
+                funcionario:
+                  type: integer
+                total:
+                  type: integer
+                cliente:
+                  type: integer
+                km:
+                  type: integer
+                finalizada:
+                  type: boolean
+                isPaga:
+                  type: boolean
+      responses:
+        '200':
+          description: alterou o ordem-servico
+
+  /ordens-servicos/{valor}:
+    get:
+      summary: Traz um cliente em ordem-servico
+      tags:
+        - ordem-servico
+      parameters:
+      - name: valor
+        in: path
+        required: true
+        schema:
+          type: string
+          minimum: 1
+      responses:
+        '200':
+          description: trouxe o cliente em ordem-servico
+
+
+  /servicos:
+    get:
+      tags:
+      - servicos
+      summary: listagem servicos
+      description: traz uma  lista com todos os servicos cadastrados no sistema
+      responses:
+        '200':
+          description: realizou a listagem de servicos com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '400':
+          description: sintaxe inválida
+
+  /servico:
+    post:
+      tags:
+        - servicos
+      summary: adicionar um servico
+      description: a cada atriuição de um novo servico é atribuido um id automaticamente
+      responses:
+        '201':
+          description: novo servico cadastrado
+        '400':
+          description: sintaxe inválida
+        '409':
+          description: servico já cadastrado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                preco:
+                  type: integer
+                descricao:
+                  type: string
+        description: servico cadastrado
+        
+  /servico/{id}:
+    get:
+      summary: Traz um servico especifico pelo id
+      tags:
+        - servicos
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+      responses:
+        '200':
+          description: trouxe o servico
+            
+    put:
+      summary: Altera um servico
+      tags:
+        - servicos
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+          
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                preco:
+                  type: integer
+                descricao:
+                  type: string
+      responses:
+        '200':
+          description: alterou o servico
+          
+    delete:
+      summary: deletar um servico definido pelo id
+      tags:
+        - servicos
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+      responses:
+        '200':
+          description: deletou o servico
+
+  /servicos/{valor}:
+    get:
+      summary: Traz um servico por descricao
+      tags:
+        - servicos
+      parameters:
+      - name: valor
+        in: path
+        required: true
+        schema:
+          type: string
+          minimum: 1
+      responses:
+        '200':
+          description: trouxe o servico
+
+        
+components:
+  schemas:
+    cliente:
+      type: object
+      required:
+        - nome
+        - cpf/cnpj
+        - celular
+    
+    veiculo:
+      type: object
+      required:
+        - placa
+        - marca
+        - modelo
+      properties:
+        cliente:
+          $ref: "#/components/schemas/cliente"
+        
+
+    funcionario:
+      type: object
+      required:
+        - nomeFunc
+        - funcao
+
+    produto:
+      type: object
+      required:
+        - codDeBarra
+        - descricao
+        - valorCusto
+        - quantidae
+        - precoVenda
+
+    ordem-servico:
+      type: object
+      required:
+        - produtos
+        - funcinarios
+        - total
+        - finalizada
+        - isPaga
+        - km
+      properties:
+        cliente:
+          $ref: "#/components/schemas/cliente"
+        produto:
+          $ref: "#/components/schemas/produto"
+        funcionario:
+          $ref: "#/components/schemas/funcionario"
+
+    servico:
+      type: object
+      required:
+        - preco
+        - descricao
+        
+      properties:
+        nome:
+          type: string
+          example: 'João'
+        cpf/cnpj:
+          type: string
+          example: '999.999.999-99'
+        celular:
+          type: string
+          example: '(11) 999999999'
+
+        placa:
+          type: string
+          example: 'ABCD-123'
+        marca:
+          type: string
+          example: 'Honda'
+        modelo:
+          type: string
+          example: 'civic'
+
+        nomeFunc:
+          type: string
+          example: 'Matheus'
+        funcao:
+          type: string
+          example: 'mecânico'
+
+        codDeBarra:
+          type: string
+          example: '1225556SDS8956598'
+        descricao:
+          type: string
+          example: 'Óleo de motor'
+        valorCusto:
+          type: integer
+          example: 10
+        quantidade:
+          type: integer
+          example: 2
+        precoVenda: 
+          type: integer
+          example: 15
+
+        produtos:
+          type: array
+          example: 'Produto 1:1225556SDS8956598, Óleo de motor,10,2,15''Produto 2:1225556SDS8956598, Óleo de motor,9,1,14'          
+        funcionario:
+          type: integer
+          example: 2
+        total:
+          type: integer
+          example: 50
+        cliente:
+          type: integer
+          example: 5
+        finalizada:
+          type: boolean
+        isPaga:
+          type: boolean
+        km:
+          type: integer
+          example: 10900
+
+        preco:
+          type: integer
+          example: 60
