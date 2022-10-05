@@ -1,0 +1,33 @@
+1.1: Foi constatado que não seria possível criar ExecutaFuncao de forma que um mesmo funcionário e um mesmo servico pudessem
+estar em inclusões distintas, como mostrado no json abaixo. Por isso um campo "quantidade" será adicionado a ExecutaFunção
+para que, caso tenha um mesmo funcionário executando dois serviços iguais, não seja necessário criar duas instancias no banco,
+a não ser que não seja o mesmo funcionário ou o mesmo serviço.
+```json
+{
+    "servicos": [
+        {
+            "idServico": 1,
+            "descricaoServico": "Troca de óleo",
+            "precoServico": "18.15",
+            "idFuncionario": 2,
+            "nomeFuncionario": "Francisco Juan Elias Nunes"
+        },
+        {
+            "idServico": 1,
+            "descricaoServico": "Troca de óleo",
+            "precoServico": "18.15",
+            "idFuncionario": 3,
+            "nomeFuncionario": "Luan Bryan Rodrigues"
+        },
+        {
+            "idServico": 3,
+            "descricaoServico": "Sangria de freios",
+            "precoServico": "20.0",
+            "idFuncionario": 3,
+            "nomeFuncionario": "Luan Bryan Rodrigues"
+        }
+    ]
+}
+
+```
+

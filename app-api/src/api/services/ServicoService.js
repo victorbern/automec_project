@@ -4,7 +4,7 @@ module.exports = {
     buscarTodos: () => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQuery(
-                `SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero, cidade, uf, complemento FROM Cliente`,
+                `SELECT idServico, descricaoServico, precoServico FROM Servico`,
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
@@ -19,8 +19,7 @@ module.exports = {
     buscarPorId: (id) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                `SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero, 
-                    cidade, uf, complemento FROM Cliente WHERE Cliente.idCliente = ?`,
+                "SELECT idServico, descricaoServico, precoServico FROM Servico WHERE Servico.idServico = ?",
                 [id],
                 (error, results) => {
                     if (error) {
@@ -37,34 +36,11 @@ module.exports = {
         });
     },
 
-    buscarPorNomeCliente: (nomeCliente) => {
-        nomeCliente = "%" + nomeCliente + "%";
-        return new Promise((aceito, rejeitado) => {
-            db.executeSQLQueryParams(
-                "SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero," +
-                    "cidade, uf, complemento FROM Cliente WHERE nomeCliente like ?",
-                [nomeCliente],
-                (error, results) => {
-                    if (error) {
-                        rejeitado(error);
-                        return;
-                    }
-                    if (results.length > 0) {
-                        aceito(results);
-                    } else {
-                        aceito(false);
-                    }
-                }
-            );
-        });
-    },
-
     buscaPorValor: (valor) => {
         valor = "%" + valor + "%";
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero," +
-                    "cidade, uf, complemento FROM Cliente WHERE nomeCliente like ? OR cpfCnpj like ?",
+                "SELECT idServico, descricaoServico, precoServico FROM Servico WHERE idServico like ? OR descricaoServico like ?",
                 [valor, valor],
                 (error, results) => {
                     if (error) {
@@ -81,32 +57,11 @@ module.exports = {
         });
     },
 
-    inserirCliente: (
-        nomeCliente,
-        cpfCnpj,
-        celularCliente,
-        cep,
-        endereco,
-        numero,
-        cidade,
-        uf,
-        complemento
-    ) => {
+    inserirServico: (descricaoServico, precoServico) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                `INSERT INTO Cliente (nomeCliente, cpfCnpj, celularCliente, cep,` +
-                    `endereco, numero, cidade, uf, complemento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [
-                    nomeCliente,
-                    cpfCnpj,
-                    celularCliente,
-                    cep,
-                    endereco,
-                    numero,
-                    cidade,
-                    uf,
-                    complemento,
-                ],
+                `INSERT INTO Servico (descricaoServico, precoServico) VALUES (?, ?)`,
+                [descricaoServico, precoServico],
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
@@ -118,34 +73,11 @@ module.exports = {
         });
     },
 
-    alterarCliente: (
-        id,
-        nomeCliente,
-        cpfCnpj,
-        celularCliente,
-        cep,
-        endereco,
-        numero,
-        cidade,
-        uf,
-        complemento
-    ) => {
+    alterarServico: (id, descricaoServico, precoServico) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "UPDATE Cliente SET nomeCliente = ?, cpfCnpj = ?, celularCliente = ?," +
-                    "cep = ?, endereco = ?, numero = ?, cidade = ?, uf = ?, complemento = ? WHERE idCliente = ?",
-                [
-                    nomeCliente,
-                    cpfCnpj,
-                    celularCliente,
-                    cep,
-                    endereco,
-                    numero,
-                    cidade,
-                    uf,
-                    complemento,
-                    id,
-                ],
+                "UPDATE Servico SET descricaoServico = ?, precoServico = ? WHERE idServico = ?",
+                [descricaoServico, precoServico, id],
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
@@ -157,10 +89,10 @@ module.exports = {
         });
     },
 
-    excluirCliente: (id) => {
+    excluirServico: (id) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "DELETE FROM Cliente WHERE idCliente = ?",
+                "DELETE FROM Servico WHERE idServico = ?",
                 [id],
                 (error, results) => {
                     if (error) {

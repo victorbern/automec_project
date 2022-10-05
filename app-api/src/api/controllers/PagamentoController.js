@@ -3,8 +3,8 @@ const ClienteService = require("../services/ClienteService");
 
 module.exports = {
     buscarTodos: async (req, res) => {
-        let json = { error: "Teste", result: [] };
-        let clientes = await ClienteService.buscarTodos().catch((error) => {
+        let json = { error: "", result: [] };
+        let pagamentos = await ClienteService.buscarTodos().catch((error) => {
             json.error = error;
         });
 
