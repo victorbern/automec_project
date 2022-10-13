@@ -1,11 +1,12 @@
 const { json } = require("body-parser");
+const AppError = require("../errors/AppError");
 const VeiculoService = require("../services/VeiculoService");
 
 module.exports = {
     buscarTodos: async (req, res) => {
         let json = { error: "", result: [] };
         let veiculos = await VeiculoService.buscarTodos().catch((error) => {
-            json.error = error;
+            throw new AppError(error, 500);
         });
 
         for (let i in veiculos) {
@@ -30,7 +31,7 @@ module.exports = {
         let placa = req.params.placa;
         let veiculo = await VeiculoService.buscaEspecificaPlaca(placa).catch(
             (error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             }
         );
         json.result.push({
@@ -53,7 +54,7 @@ module.exports = {
         let valor = req.params.valor;
         let veiculos = await VeiculoService.buscaPorValor(valor).catch(
             (error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             }
         );
 
@@ -95,7 +96,7 @@ module.exports = {
                 cor,
                 veiculo_idCliente
             ).catch((error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             });
             json.result = {
                 placaVeiculo,
@@ -107,7 +108,7 @@ module.exports = {
                 veiculo_idCliente,
             };
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);
@@ -134,7 +135,7 @@ module.exports = {
                 cor,
                 veiculo_idCliente
             ).catch((error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             });
             json.result = {
                 placaVeiculo,
@@ -146,7 +147,7 @@ module.exports = {
                 veiculo_idCliente,
             };
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
         res.json(json);
     },
@@ -157,7 +158,7 @@ module.exports = {
         let veiculos = await VeiculoService.buscarPorCliente(
             veiculo_idCliente
         ).catch((error) => {
-            json.error = error;
+            throw new AppError(error, 500);
         });
 
         for (let i in veiculos) {
@@ -184,13 +185,13 @@ module.exports = {
 
         if (placaVeiculo) {
             await VeiculoService.excluirVeiculo(placaVeiculo).catch((error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             });
             json.result = {
                 placaVeiculo: placaVeiculo,
             };
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);

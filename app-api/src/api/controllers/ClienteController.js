@@ -1,12 +1,16 @@
 const { json } = require("body-parser");
+const AppError = require("../errors/AppError");
 const ClienteService = require("../services/ClienteService");
+const models = require("../models");
+const Cliente = models.clienteModel;
 
 module.exports = {
     buscarTodos: async (req, res) => {
-        let json = { error: "Teste", result: [] };
-        let clientes = await ClienteService.buscarTodos().catch((error) => {
-            json.error = error;
-        });
+        let json = { error: "", result: [] };
+        let clientes = await Cliente.findAll();
+        // let clientes = await ClienteService.buscarTodos().catch((error) => {
+        //     throw new AppError(error, 500);
+        // });
 
         for (let i in clientes) {
             json.result.push({
@@ -14,9 +18,11 @@ module.exports = {
                 nomeCliente: clientes[i].nomeCliente,
                 cpfCnpj: clientes[i].cpfCnpj,
                 celularCliente: clientes[i].celularCliente,
+                telefoneCliente: clientes[i].telefoneCliente,
                 cep: clientes[i].cep,
                 endereco: clientes[i].endereco,
                 numero: clientes[i].numero,
+                bairro: clientes[i].bairro,
                 cidade: clientes[i].cidade,
                 uf: clientes[i].uf,
                 complemento: clientes[i].complemento,
@@ -29,8 +35,11 @@ module.exports = {
     buscarPorId: async (req, res) => {
         let json = { error: "", result: {} };
         let id = req.params.id;
-        let cliente = await ClienteService.buscarPorId(id).catch((error) => {
-            json.error = error;
+        // let cliente = await ClienteService.buscarPorId(id).catch((error) => {
+        //     throw new AppError(error, 500);
+        // });
+        let cliente = await Cliente.findByPk(id).catch((error) => {
+            throw new AppError(error, 500);
         });
 
         if (cliente) {
@@ -45,7 +54,7 @@ module.exports = {
         let valor = req.params.valor;
         let clientes = await ClienteService.buscaPorValor(valor).catch(
             (error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             }
         );
 
@@ -55,9 +64,11 @@ module.exports = {
                 nomeCliente: clientes[i].nomeCliente,
                 cpfCnpj: clientes[i].cpfCnpj,
                 celularCliente: clientes[i].celularCliente,
+                telefoneCliente: clientes[i].telefoneCliente,
                 cep: clientes[i].cep,
                 endereco: clientes[i].endereco,
                 numero: clientes[i].numero,
+                bairro: clientes[i].bairro,
                 cidade: clientes[i].cidade,
                 uf: clientes[i].uf,
                 complemento: clientes[i].complemento,
@@ -73,9 +84,11 @@ module.exports = {
         let nomeCliente = req.body.nomeCliente;
         let cpfCnpj = req.body.cpfCnpj;
         let celularCliente = req.body.celularCliente;
+        let telefoneCliente = req.body.telefoneCliente;
         let cep = req.body.cep;
         let endereco = req.body.endereco;
         let numero = req.body.numero;
+        let bairro = req.body.bairro;
         let cidade = req.body.cidade;
         let uf = req.body.uf;
         let complemento = req.body.complemento;
@@ -85,14 +98,16 @@ module.exports = {
                 nomeCliente,
                 cpfCnpj,
                 celularCliente,
+                telefoneCliente,
                 cep,
                 endereco,
                 numero,
+                bairro,
                 cidade,
                 uf,
                 complemento
             ).catch((error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             });
 
             json.result = {
@@ -100,15 +115,17 @@ module.exports = {
                 nomeCliente,
                 cpfCnpj,
                 celularCliente,
+                telefoneCliente,
                 cep,
                 endereco,
                 numero,
+                bairro,
                 cidade,
                 uf,
                 complemento,
             };
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);
@@ -121,9 +138,11 @@ module.exports = {
         let nomeCliente = req.body.nomeCliente;
         let cpfCnpj = req.body.cpfCnpj;
         let celularCliente = req.body.celularCliente;
+        let telefoneCliente = req.body.telefoneCliente;
         let cep = req.body.cep;
         let endereco = req.body.endereco;
         let numero = req.body.numero;
+        let bairro = req.body.bairro;
         let cidade = req.body.cidade;
         let uf = req.body.uf;
         let complemento = req.body.complemento;
@@ -134,29 +153,33 @@ module.exports = {
                 nomeCliente,
                 cpfCnpj,
                 celularCliente,
+                telefoneCliente,
                 cep,
                 endereco,
                 numero,
+                bairro,
                 cidade,
                 uf,
                 complemento
             ).catch((error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             });
             json.result = {
                 id,
                 nomeCliente,
                 cpfCnpj,
                 celularCliente,
+                telefoneCliente,
                 cep,
                 endereco,
                 numero,
+                bairro,
                 cidade,
                 uf,
                 complemento,
             };
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);
@@ -169,13 +192,13 @@ module.exports = {
 
         if (id) {
             await ClienteService.excluirCliente(id).catch((error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             });
             json.result = {
                 id,
             };
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);

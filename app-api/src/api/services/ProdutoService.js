@@ -13,11 +13,11 @@ module.exports = {
         });
     },
 
-    buscarPorId: (idProduto) => {
+    buscaEspecificaCodigoBarras: (codigoBarras) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "SELECT * FROM produto WHERE produto.idProduto = ?",
-                [idProduto],
+                "SELECT * FROM produto WHERE codigoBarras = ?",
+                [codigoBarras],
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
@@ -37,7 +37,7 @@ module.exports = {
         valor = "%" + valor + "%";
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "SELECT idProduto, codigoBarras, descricao, valorCusto, quantidadeEstoque, precoVenda FROM Produto WHERE descricao like ? OR codigoBarras like ?",
+                "SELECT codigoBarras, descricao, valorCusto, quantidadeEstoque, precoVenda FROM Produto WHERE descricao like ? OR codigoBarras like ?",
                 [valor, valor],
                 (error, results) => {
                     if (error) {
@@ -76,7 +76,7 @@ module.exports = {
                         rejeitado(error);
                         return;
                     }
-                    aceito(results.insertId);
+                    aceito(results);
                 }
             );
         });
@@ -98,53 +98,33 @@ module.exports = {
         });
     },
 
-    alterarEstoque: (id, valorAlteracao) => {
+    alterarEstoque: (codigoBarras, valorAlteracao) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "UPDATE produto SET quantidadeEstoque = quantidadeEstoque+? WHERE idProduto = ?",
-                [valorAlteracao, id],
+                "UPDATE produto SET quantidadeEstoque = quantidadeEstoque+? WHERE codigoBarras = ?",
+                [valorAlteracao, codigoBarras],
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
                         return;
                     }
-
-                    db.executeSQLQueryParams(
-                        "SELECT quantidadeEstoque FROM Produto WHERE idProduto = ?",
-                        [id],
-                        (error, resultSelect) => {
-                            if (error) {
-                                rejeitado(error);
-                                return;
-                            }
-                            aceito(resultSelect);
-                        }
-                    );
                     aceito(results);
                 }
             );
         });
     },
 
-    alterarProduto: (
-        idProduto,
-        codigoBarras,
-        descricao,
-        valorCusto,
-        quantidadeEstoque,
-        precoVenda
-    ) => {
+    alterarProduto: (codigoBarras, descricao, valorCusto, precoVenda) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "UPDATE produto SET codigoBarras = ?, descricao = ?, valorCusto = ?," +
-                    "quantidadeEstoque = ?, precoVenda = ? WHERE idProduto = ?",
+                "UPDATE produto SET descricao = ?, valorCusto = ?," +
+                    "quantidadeEstoque = ?, precoVenda = ? WHERE codigoBarras = ?",
                 [
-                    codigoBarras,
                     descricao,
                     valorCusto,
                     quantidadeEstoque,
                     precoVenda,
-                    idProduto,
+                    codigoBarras,
                 ],
                 (error, results) => {
                     if (error) {
@@ -157,11 +137,11 @@ module.exports = {
         });
     },
 
-    excluirProduto: (id) => {
+    excluirProduto: (codigoBarras) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "DELETE FROM Produto WHERE idProduto = ?",
-                [id],
+                "DELETE FROM Produto WHERE codigoBarras = ?",
+                [codigoBarras],
                 (error, results) => {
                     if (error) {
                         rejeitado(error);

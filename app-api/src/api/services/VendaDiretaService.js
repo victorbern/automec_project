@@ -36,51 +36,17 @@ module.exports = {
         });
     },
 
-    buscarPorProduto: (idProduto) => {
-        return new Promise((aceito, rejeitado) => {
-            db.executeSQLQueryParams("SELECT idVendaDireta, ");
-        });
-    },
-
-    buscarPorNomeCliente: (nomeCliente) => {
-        nomeCliente = "%" + nomeCliente + "%";
+    buscarPorPagamento: (idPagamento) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero," +
-                    "cidade, uf, complemento FROM Cliente WHERE nomeCliente like ?",
-                [nomeCliente],
+                `SELECT idVendaDireta, total, dataHora  FROM VendaDireta WHERE idPagamento = ?`,
+                [idPagamento],
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
                         return;
                     }
-                    if (results.length > 0) {
-                        aceito(results);
-                    } else {
-                        aceito(false);
-                    }
-                }
-            );
-        });
-    },
-
-    buscaPorValor: (valor) => {
-        valor = "%" + valor + "%";
-        return new Promise((aceito, rejeitado) => {
-            db.executeSQLQueryParams(
-                "SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero," +
-                    "cidade, uf, complemento FROM Cliente WHERE nomeCliente like ? OR cpfCnpj like ?",
-                [valor, valor],
-                (error, results) => {
-                    if (error) {
-                        rejeitado(error);
-                        return;
-                    }
-                    if (results.length > 0) {
-                        aceito(results);
-                    } else {
-                        aceito(false);
-                    }
+                    aceito(results);
                 }
             );
         });

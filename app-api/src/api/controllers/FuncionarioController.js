@@ -1,4 +1,5 @@
 const { json } = require("body-parser");
+const AppError = require("../errors/AppError");
 const FuncionarioService = require("../services/FuncionarioService");
 
 module.exports = {
@@ -6,7 +7,7 @@ module.exports = {
         let json = { error: "", result: [] };
         let funcionarios = await FuncionarioService.buscarTodos().catch(
             (error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             }
         );
 
@@ -28,7 +29,7 @@ module.exports = {
         let funcionario = await FuncionarioService.buscarPorId(
             idFuncionario
         ).catch((error) => {
-            json.error = error;
+            throw new AppError(error, 500);
         });
 
         if (funcionario) {
@@ -43,7 +44,7 @@ module.exports = {
         let valor = req.params.valor;
         let funcionarios = await FuncionarioService.buscaPorValor(valor).catch(
             (error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             }
         );
 
@@ -71,20 +72,17 @@ module.exports = {
                 nomeFuncionario,
                 isAtivo,
                 funcao
-            )
-                .then(() => {
-                    json.result = {
-                        idFuncionario: IdFuncionario,
-                        nomeFuncionario,
-                        isAtivo,
-                        funcao,
-                    };
-                })
-                .catch((error) => {
-                    json.error = error;
-                });
+            ).catch((error) => {
+                throw new AppError(error, 500);
+            });
+            json.result = {
+                idFuncionario: IdFuncionario,
+                nomeFuncionario,
+                isAtivo,
+                funcao,
+            };
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);
@@ -104,20 +102,17 @@ module.exports = {
                 nomeFuncionario,
                 isAtivo,
                 funcao
-            )
-                .then(() => {
-                    json.result = {
-                        idFuncionario,
-                        nomeFuncionario,
-                        isAtivo,
-                        funcao,
-                    };
-                })
-                .catch((error) => {
-                    json.error = error;
-                });
+            ).catch((error) => {
+                throw new AppError(error, 500);
+            });
+            json.result = {
+                idFuncionario,
+                nomeFuncionario,
+                isAtivo,
+                funcao,
+            };
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);
@@ -129,15 +124,12 @@ module.exports = {
         let id = req.params.id;
 
         if (id) {
-            await FuncionarioService.excluirFuncionario(id)
-                .then(() => {
-                    json.result = { id };
-                })
-                .catch((error) => {
-                    json.error = error;
-                });
+            await FuncionarioService.excluirFuncionario(id).catch((error) => {
+                throw new AppError(error, 500);
+            });
+            json.result = { id };
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);

@@ -1,11 +1,12 @@
 const { json } = require("body-parser");
+const AppError = require("../errors/AppError");
 const ServicoService = require("../services/ServicoService");
 
 module.exports = {
     buscarTodos: async (req, res) => {
         let json = { error: "", result: [] };
         let servicos = await ServicoService.buscarTodos().catch((error) => {
-            json.error = error;
+            throw new AppError(error, 500);
         });
         for (let i in servicos) {
             json.result.push({
@@ -22,7 +23,7 @@ module.exports = {
         let json = { error: "", result: {} };
         let id = req.params.id;
         let servico = await ServicoService.buscarPorId(id).catch((error) => {
-            json.error = error;
+            throw new AppError(error, 500);
         });
 
         if (servico) {
@@ -37,7 +38,7 @@ module.exports = {
         let valor = req.params.valor;
         let servicos = await ServicoService.buscaPorValor(valor).catch(
             (error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             }
         );
 
@@ -62,19 +63,16 @@ module.exports = {
             let IdServico = await ServicoService.inserirServico(
                 descricaoServico,
                 precoServico
-            )
-                .then(() => {
-                    json.result = {
-                        idServico: IdServico,
-                        descricaoServico: descricaoServico,
-                        precoServico: precoServico,
-                    };
-                })
-                .catch((error) => {
-                    json.error = error;
-                });
+            ).catch((error) => {
+                throw new AppError(error, 500);
+            });
+            json.result = {
+                idServico: IdServico,
+                descricaoServico: descricaoServico,
+                precoServico: precoServico,
+            };
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);
@@ -92,19 +90,16 @@ module.exports = {
                 id,
                 descricaoServico,
                 precoServico
-            )
-                .then(() => {
-                    json.result = {
-                        id,
-                        descricaoServico,
-                        precoServico,
-                    };
-                })
-                .catch((error) => {
-                    json.error = error;
-                });
+            ).catch((error) => {
+                throw new AppError(error, 500);
+            });
+            json.result = {
+                id,
+                descricaoServico,
+                precoServico,
+            };
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);
@@ -116,17 +111,14 @@ module.exports = {
         let id = req.params.id;
 
         if (id) {
-            await ServicoService.excluirServico(id)
-                .then(() => {
-                    json.result = {
-                        id,
-                    };
-                })
-                .catch((error) => {
-                    json.error = error;
-                });
+            await ServicoService.excluirServico(id).catch((error) => {
+                throw new AppError(error, 500);
+            });
+            json.result = {
+                id,
+            };
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);

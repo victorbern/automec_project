@@ -2,7 +2,7 @@ const { json } = require("body-parser");
 const ProdutoService = require("../services/ProdutoService");
 const VendaDiretaService = require("../services/VendaDiretaService");
 const qs = require("qs");
-const OrdemServicoController = require("./OrdemServicoController");
+const AppError = require("../errors/AppError");
 
 module.exports = {
     buscarTodos: async (req, res) => {
@@ -10,7 +10,7 @@ module.exports = {
 
         let vendaDireta = await VendaDiretaService.buscarTodos().catch(
             (error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             }
         );
         if (!vendaDireta) {
@@ -21,7 +21,7 @@ module.exports = {
             let vendas = await VendaDiretaService.buscarVendasPorVendaDireta(
                 vendaDireta[i].idVendaDireta
             ).catch((error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             });
             let jsonVendas = [];
             if (vendas) {
@@ -29,7 +29,7 @@ module.exports = {
                     let produto = await ProdutoService.buscarPorId(
                         vendas[j].idProduto
                     ).catch((error) => {
-                        json.error = error;
+                        throw new AppError(error, 500);
                     });
                     jsonVendas.push({
                         idProduto: vendas[j].idProduto,
@@ -58,7 +58,7 @@ module.exports = {
         let vendaDireta = await VendaDiretaService.buscarPorId(
             idVendaDireta
         ).catch((error) => {
-            json.error = error;
+            throw new AppError(error, 500);
         });
         if (!vendaDireta) {
             json.result = "Não foi encontrada nenhuma venda direta com este id";
@@ -66,7 +66,7 @@ module.exports = {
         let vendas = await VendaDiretaService.buscarVendasPorVendaDireta(
             idVendaDireta
         ).catch((error) => {
-            json.error = error;
+            throw new AppError(error, 500);
         });
         let jsonVendas = [];
         if (vendas) {
@@ -74,7 +74,7 @@ module.exports = {
                 let produto = await ProdutoService.buscarPorId(
                     vendas[i].idProduto
                 ).catch((error) => {
-                    json.error = error;
+                    throw new AppError(error, 500);
                 });
                 jsonVendas.push({
                     idProduto: vendas[i].idProduto,
@@ -104,7 +104,7 @@ module.exports = {
         let vendaDireta_buscada = await VendaDiretaService.buscarPorId(
             valor
         ).catch((error) => {
-            json.error = error;
+            throw new AppError(error, 500);
         });
         let vendaDireta = [];
         if (vendaDireta_buscada) {
@@ -112,7 +112,7 @@ module.exports = {
         }
         let produtos = await ProdutoService.buscaPorValor(valor).catch(
             (error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             }
         );
 
@@ -121,7 +121,7 @@ module.exports = {
                 await VendaDiretaService.buscarVendasPorProduto(
                     produtos[i].idProduto
                 ).catch((error) => {
-                    json.error = error;
+                    throw new AppError(error, 500);
                 });
             // Comando para remover o RowDataPacket
             vendasDiretas_buscadas = JSON.parse(
@@ -153,7 +153,7 @@ module.exports = {
             let vendas = await VendaDiretaService.buscarVendasPorVendaDireta(
                 vendaDireta[i].idVendaDireta
             ).catch((error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             });
             let jsonVendas = [];
             if (vendas) {
@@ -161,7 +161,7 @@ module.exports = {
                     let produto = await ProdutoService.buscarPorId(
                         vendas[j].idProduto
                     ).catch((error) => {
-                        json.error = error;
+                        throw new AppError(error, 500);
                     });
                     jsonVendas.push({
                         idProduto: vendas[j].idProduto,
@@ -196,9 +196,7 @@ module.exports = {
                 idPagamento,
                 total
             ).catch((error) => {
-                json.error = error;
-                res.json(json);
-                return;
+                throw new AppError(error, 500);
             });
             if (valores.produtos) {
                 for (let i in valores.produtos) {
@@ -212,23 +210,19 @@ module.exports = {
                         quantidadeVendida,
                         precoTotal
                     ).catch((error) => {
-                        json.error = error;
-                        res.json(json);
-                        return;
+                        throw new AppError(error, 500);
                     });
                     await ProdutoService.alterarEstoque(
                         idProduto,
                         quantidadeVendida * -1
                     ).catch((error) => {
-                        json.error = error;
-                        res.json(json);
-                        return;
+                        throw new AppError(error, 500);
                     });
                 }
             }
             json.result = "Dados enviados";
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);
@@ -248,12 +242,12 @@ module.exports = {
                 idVendaDireta,
                 total
             ).catch((error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             });
             let vendas = await VendaDiretaService.buscarVendasPorVendaDireta(
                 idVendaDireta
             ).catch((error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             });
             let vendasCadastradas = [];
             if (vendas) {
@@ -284,7 +278,7 @@ module.exports = {
                             idVendaDireta,
                             vendasCadastradas[i].idProduto
                         ).catch((error) => {
-                            json.error = error;
+                            throw new AppError(error, 500);
                         });
                     }
                 }
@@ -318,7 +312,7 @@ module.exports = {
             }
             json.result = "Dados enviados";
         } else {
-            json.result = "Dados não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);
@@ -332,19 +326,26 @@ module.exports = {
             let vendas = await VendaDiretaService.buscarVendasPorVendaDireta(
                 idVendaDireta
             ).catch((error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             });
             for (let i in vendas) {
                 await VendaDiretaService.excluirProdutoVendaDireta(
-                    vendas[i].IdVendaDireta,
+                    vendas[i].idVendaDireta,
                     vendas[i].idProduto
-                );
+                ).catch((error) => {
+                    throw new AppError(error, 500);
+                    res.json(json);
+                    return;
+                });
             }
             await VendaDiretaService.excluirVendaDireta(idVendaDireta).catch(
                 (error) => {
-                    json.error = error;
+                    throw new AppError(error, 500);
                 }
             );
+            json.result = "Dados excluidos com sucesso!";
+        } else {
+            throw new AppError("Campos não enviados", 400);
         }
         res.json(json);
     },

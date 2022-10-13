@@ -4,11 +4,11 @@ const router = express.Router();
 const ClienteController = require("../controllers/ClienteController");
 const FuncionarioController = require("../controllers/FuncionarioController");
 const OrdemServicoController = require("../controllers/OrdemServicoController");
+const PagamentoController = require("../controllers/PagamentoController");
 const ProdutoController = require("../controllers/ProdutoController");
 const ServicoController = require("../controllers/ServicoController");
 const VeiculoController = require("../controllers/VeiculoController");
 const VendaDiretaController = require("../controllers/VendaDiretaController");
-const VendaDiretaService = require("../services/VendaDiretaService");
 
 // APIs para cliente
 router.get("/clientes", ClienteController.buscarTodos); // Buscar todos os clientes
@@ -28,11 +28,11 @@ router.get("/funcionarios/:valor", FuncionarioController.buscaPorValor); // Busc
 
 // APIs para produtos
 router.get("/produtos", ProdutoController.buscarTodos);
-router.get("/produto/:id", ProdutoController.buscarPorId);
+router.get("/produto/:codigoBarras", ProdutoController.buscarPorCodigoBarras);
 router.post("/produto", ProdutoController.inserirProduto);
-router.put("/produto/:id", ProdutoController.alterarProduto);
-router.put("/alterar-estoque/:id", ProdutoController.alterarEstoque);
-router.delete("/produto/:id", ProdutoController.excluirProduto);
+router.put("/produto/:codigoBarras", ProdutoController.alterarProduto);
+router.put("/alterar-estoque/:codigoBarras", ProdutoController.alterarEstoque);
+router.delete("/produto/:codigoBarras", ProdutoController.excluirProduto);
 router.get("/produtos/:valor", ProdutoController.buscaPorValor); // Buscar produto por descricao ou por código de barras
 
 // APIs para veículos
@@ -68,7 +68,15 @@ router.get("/vendas-direta", VendaDiretaController.buscarTodos); // Buscar todas
 router.get("/venda-direta/:id", VendaDiretaController.buscarPorId); // Buscar venda direta por id
 router.post("/venda-direta", VendaDiretaController.inserirVendaDireta); // Inserir novo cliente no banco de dados
 router.put("/venda-direta/:id", VendaDiretaController.alterarVendaDireta); // Alterar dados de uma venda direta
-router.delete("/venda-direta/:id", VendaDiretaService.excluirVendaDireta); // Deletar um cliente do banco de dados
+router.delete("/venda-direta/:id", VendaDiretaController.excluirVendaDireta); // Deletar um cliente do banco de dados
 router.get("/vendas-direta/:valor", VendaDiretaController.buscaPorValor); // Buscar venda direta por id ou por produto
+
+// APIs para pagamento
+router.get("/pagamentos", PagamentoController.buscarTodos); // Buscar todos os pagamentos
+router.get("/pagamento/:id", PagamentoController.buscarPorId); // Buscar pagamento por id
+router.post("/pagamento", PagamentoController.inserirPagamento); // Inserir novo pagamento no banco de dados
+// router.put("/cliente/:id", ClienteController.alterarCliente); // Alterar dados de um cliente
+// router.delete("/cliente/:id", ClienteController.excluirCliente); // Deletar um cliente do banco de dados
+// router.get("/clientes/:valor", ClienteController.buscaPorValor); // Buscar cliente por nome e/ou cpfCnpj
 
 module.exports = router;
