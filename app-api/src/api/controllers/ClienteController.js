@@ -1,14 +1,11 @@
 const { json } = require("body-parser");
 const AppError = require("../errors/AppError");
 const ClienteService = require("../services/ClienteService");
-const models = require("../models");
-const { Op } = require("sequelize");
-const Cliente = models.clienteModel;
 
 module.exports = {
     buscarTodos: async (req, res) => {
-        let json = { error: "", result: [] };
-        let clientes = await Cliente.findAll().catch((error) => {
+        let json = { error: "Teste", result: [] };
+        let clientes = await ClienteService.buscarTodos().catch((error) => {
             throw new AppError(error, 500);
         });
 
@@ -35,8 +32,7 @@ module.exports = {
     buscarPorId: async (req, res) => {
         let json = { error: "", result: {} };
         let id = req.params.id;
-
-        let cliente = await Cliente.findByPk(id).catch((error) => {
+        let cliente = await ClienteService.buscarPorId(id).catch((error) => {
             throw new AppError(error, 500);
         });
 
@@ -50,22 +46,11 @@ module.exports = {
     buscaPorValor: async (req, res) => {
         let json = { error: "", result: [] };
         let valor = req.params.valor;
-        let clientes = await Cliente.findAll({
-            where: {
-                [Op.or]: [
-                    {
-                        nomeCliente: {
-                            [Op.substring]: valor,
-                        },
-                    },
-                    {
-                        cpfCnpj: {
-                            [Op.substring]: valor,
-                        },
-                    },
-                ],
-            },
-        });
+        let clientes = await ClienteService.buscaPorValor(valor).catch(
+            (error) => {
+                throw new AppError(error, 500);
+            }
+        );
 
         for (let i in clientes) {
             json.result.push({
@@ -103,7 +88,24 @@ module.exports = {
         let complemento = req.body.complemento;
 
         if (nomeCliente && celularCliente && cpfCnpj) {
-            await Cliente.create({
+            let IdCliente = await ClienteService.inserirCliente(
+                nomeCliente,
+                cpfCnpj,
+                celularCliente,
+                telefoneCliente,
+                cep,
+                endereco,
+                numero,
+                bairro,
+                cidade,
+                uf,
+                complemento
+            ).catch((error) => {
+                throw new AppError(error, 500);
+            });
+
+            json.result = {
+                id: IdCliente,
                 nomeCliente,
                 cpfCnpj,
                 celularCliente,
@@ -115,11 +117,7 @@ module.exports = {
                 cidade,
                 uf,
                 complemento,
-            }).catch((error) => {
-                throw new AppError(error, 500);
-            });
-
-            json.result = "Dados inseridos com sucesso!";
+            };
         } else {
             throw new AppError("Campos não enviados", 400);
         }
@@ -130,7 +128,7 @@ module.exports = {
     alterarCliente: async (req, res) => {
         let json = { error: "", result: {} };
 
-        let idCliente = req.params.id;
+        let id = req.params.id;
         let nomeCliente = req.body.nomeCliente;
         let cpfCnpj = req.body.cpfCnpj;
         let celularCliente = req.body.celularCliente;
@@ -143,27 +141,37 @@ module.exports = {
         let uf = req.body.uf;
         let complemento = req.body.complemento;
 
-        if (nomeCliente && celularCliente && cpfCnpj && idCliente) {
-            await Cliente.update(
-                {
-                    nomeCliente: nomeCliente,
-                    cpfCnpj: cpfCnpj,
-                    celularCliente: celularCliente,
-                    telefoneCliente: telefoneCliente,
-                    cep: cep,
-                    endereco: endereco,
-                    numero: numero,
-                    bairro: bairro,
-                    cidade: cidade,
-                    uf: uf,
-                    complemento: complemento,
-                },
-                { where: { idCliente: idCliente } }
+        if (nomeCliente && celularCliente && cpfCnpj && id) {
+            await ClienteService.alterarCliente(
+                id,
+                nomeCliente,
+                cpfCnpj,
+                celularCliente,
+                telefoneCliente,
+                cep,
+                endereco,
+                numero,
+                bairro,
+                cidade,
+                uf,
+                complemento
             ).catch((error) => {
                 throw new AppError(error, 500);
             });
-
-            json.result = "Dados alterados com sucesso!";
+            json.result = {
+                id,
+                nomeCliente,
+                cpfCnpj,
+                celularCliente,
+                telefoneCliente,
+                cep,
+                endereco,
+                numero,
+                bairro,
+                cidade,
+                uf,
+                complemento,
+            };
         } else {
             throw new AppError("Campos não enviados", 400);
         }
@@ -174,15 +182,13 @@ module.exports = {
     excluirCliente: async (req, res) => {
         let json = { error: "", result: {} };
 
-        let idCliente = req.params.id;
+        let id = req.params.id;
 
-        if (idCliente) {
-            await Cliente.destroy({ where: { idCliente: idCliente } }).catch(
-                (error) => {
-                    throw new AppError(error, 500);
-                }
-            );
-            json.result = "Cliente excluido com sucesso!";
+        if (id) {
+            await ClienteService.excluirCliente(id).catch((error) => {
+                throw new AppError(error, 500);
+            });
+            json.result = "Cliente deletado com sucesso!";
         } else {
             throw new AppError("Campos não enviados", 400);
         }

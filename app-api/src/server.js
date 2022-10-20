@@ -4,6 +4,8 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 let dados = require("./database");
+// const auth = require("../../auth/middleware/auth");
+const auth = require("./api/middleware/auth");
 // dados.inserirDados();
 const app = express();
 
@@ -12,7 +14,7 @@ const routes = require("./api/routes/routes");
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use("/api", routes);
+app.use("/api", auth, routes);
 app.get("/", (req, res) => res.send("Aplicação Rodando!"));
 
 app.use((error, req, res, next) => {

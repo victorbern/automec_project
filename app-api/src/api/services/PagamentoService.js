@@ -91,11 +91,11 @@ module.exports = {
         });
     },
 
-    excluirCliente: (id) => {
+    excluirPagamento: (idPagamento) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "DELETE FROM Cliente WHERE idCliente = ?",
-                [id],
+                "DELETE FROM Pagamento WHERE idPagamento = ?",
+                [idPagamento],
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
@@ -141,17 +141,11 @@ module.exports = {
         });
     },
 
-    alterarPagamento: (
-        idPagamento,
-        subtotal,
-        total,
-        desconto,
-        formaPagamento
-    ) => {
+    excluirDetalhePagamento: (idPagamento, idOrdemServico) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                `UPDATE Pagamento SET subtotal = ?, total = ?, desconto = ?, formaPagamento = ? WHERE idPagamento = ?`,
-                [subtotal, total, desconto, formaPagamento, idPagamento],
+                `DELETE FROM DetalhePagamento WHERE idPagamento = ? && idOrdemServico = ?`,
+                [idPagamento, idOrdemServico],
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
@@ -162,6 +156,28 @@ module.exports = {
             );
         });
     },
+
+    // alterarPagamento: (
+    //     idPagamento,
+    //     subtotal,
+    //     total,
+    //     desconto,
+    //     formaPagamento
+    // ) => {
+    //     return new Promise((aceito, rejeitado) => {
+    //         db.executeSQLQueryParams(
+    //             `UPDATE Pagamento SET subtotal = ?, total = ?, desconto = ?, formaPagamento = ? WHERE idPagamento = ?`,
+    //             [subtotal, total, desconto, formaPagamento, idPagamento],
+    //             (error, results) => {
+    //                 if (error) {
+    //                     rejeitado(error);
+    //                     return;
+    //                 }
+    //                 aceito(results);
+    //             }
+    //         );
+    //     });
+    // },
 };
 
 // Alterações feitas no dia 27/08/2022

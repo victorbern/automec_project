@@ -4,7 +4,7 @@ module.exports = {
     buscarTodos: () => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQuery(
-                `SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero, cidade, uf, complemento FROM Cliente`,
+                `SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, telefoneCliente, cep, endereco, numero, bairro, cidade, uf, complemento FROM Cliente`,
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
@@ -19,7 +19,7 @@ module.exports = {
     buscarPorId: (id) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                `SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero, 
+                `SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, telefoneCliente, cep, endereco, numero, bairro,
                     cidade, uf, complemento FROM Cliente WHERE Cliente.idCliente = ?`,
                 [id],
                 (error, results) => {
@@ -41,7 +41,7 @@ module.exports = {
         nomeCliente = "%" + nomeCliente + "%";
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero," +
+                "SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, telefoneCliente, cep, endereco, numero, bairro, " +
                     "cidade, uf, complemento FROM Cliente WHERE nomeCliente like ?",
                 [nomeCliente],
                 (error, results) => {
@@ -63,7 +63,7 @@ module.exports = {
         valor = "%" + valor + "%";
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero," +
+                "SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, telefoneCliente, cep, endereco, numero, bairro, " +
                     "cidade, uf, complemento FROM Cliente WHERE nomeCliente like ? OR cpfCnpj like ?",
                 [valor, valor],
                 (error, results) => {
@@ -85,24 +85,28 @@ module.exports = {
         nomeCliente,
         cpfCnpj,
         celularCliente,
+        telefoneCliente,
         cep,
         endereco,
         numero,
+        bairro,
         cidade,
         uf,
         complemento
     ) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                `INSERT INTO Cliente (nomeCliente, cpfCnpj, celularCliente, cep,` +
-                    `endereco, numero, cidade, uf, complemento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                `INSERT INTO Cliente (nomeCliente, cpfCnpj, celularCliente, telefoneCliente, cep, ` +
+                    `endereco, numero, bairro, cidade, uf, complemento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
                     nomeCliente,
                     cpfCnpj,
                     celularCliente,
+                    telefoneCliente,
                     cep,
                     endereco,
                     numero,
+                    bairro,
                     cidade,
                     uf,
                     complemento,
@@ -123,24 +127,28 @@ module.exports = {
         nomeCliente,
         cpfCnpj,
         celularCliente,
+        telefoneCliente,
         cep,
         endereco,
         numero,
+        bairro,
         cidade,
         uf,
         complemento
     ) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "UPDATE Cliente SET nomeCliente = ?, cpfCnpj = ?, celularCliente = ?," +
-                    "cep = ?, endereco = ?, numero = ?, cidade = ?, uf = ?, complemento = ? WHERE idCliente = ?",
+                "UPDATE Cliente SET nomeCliente = ?, cpfCnpj = ?, celularCliente = ?, telefoneCliente = ?, " +
+                    "cep = ?, endereco = ?, numero = ?, bairro = ?, cidade = ?, uf = ?, complemento = ? WHERE idCliente = ?",
                 [
                     nomeCliente,
                     cpfCnpj,
                     celularCliente,
+                    telefoneCliente,
                     cep,
                     endereco,
                     numero,
+                    bairro,
                     cidade,
                     uf,
                     complemento,

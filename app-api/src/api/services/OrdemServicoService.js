@@ -115,11 +115,11 @@ module.exports = {
         });
     },
 
-    alterarStatus: (idOrdemServico) => {
+    alterarStatus: (idOrdemServico, isPaga) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                `UPDATE OrdemServico SET isFinalizada = true, isPaga = true WHERE idOrdemServico = ?`,
-                [idOrdemServico],
+                `UPDATE OrdemServico SET isPaga = ? WHERE idOrdemServico = ?`,
+                [isPaga, idOrdemServico],
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
@@ -163,7 +163,7 @@ module.exports = {
         });
     },
 
-    inserirOSDetalhes: (idOrdemServico, conexao) => {
+    inserirOSDetalhes: (idOrdemServico) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
                 `INSERT INTO OSDetalhes (idOrdemServico, dataOS) VALUES (?, CURDATE())`,
@@ -246,7 +246,7 @@ module.exports = {
     buscarVendaPorOSDetalhes: (idOSDetalhes) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "SELECT codigoBarras, quantidadeVendida, precoTotal FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ?",
+                "SELECT codigoBarras, quantidadeVendida, precoTotal, precoUnitario FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ?",
                 [idOSDetalhes],
                 (error, results) => {
                     if (error) {
@@ -266,7 +266,7 @@ module.exports = {
     buscarProdutoOSDetalhes: (idOSDetalhes, codigoBarras) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "SELECT quantidadeVendida, precoTotal FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ? && codigoBarras = ?",
+                "SELECT quantidadeVendida, precoTotal, precoUnitario FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ? && codigoBarras = ?",
                 [idOSDetalhes, codigoBarras],
                 (error, results) => {
                     if (error) {
@@ -274,7 +274,7 @@ module.exports = {
                         return;
                     }
                     if (results.length > 0) {
-                        aceito(results);
+                        aceito(results[0]);
                     } else {
                         aceito(false);
                     }
@@ -283,17 +283,40 @@ module.exports = {
         });
     },
 
+    // buscarVendasOrdemServico: (idOrdemServico) => {
+    //     return new Promise((aceito, rejeitado) => {
+    //         db.executeSQLQueryParams(
+    //             `SELECT p_od.idOSDetalhes, p_od.codigoBarras, p_od.quantidadeVendida, p_od.precoUnitario, p_od.precoTotal FROM Produto_has_OSDetalhes AS p_od INNER JOIN OSDetalhes AS od ON p_od.idOSDetalhes = od.isOSDetalhes WHERE od.idOrdemServico = ?`,
+    //             [idOrdemServico],
+    //             (error, results) => {
+    //                 if (error) {
+    //                     rejeitado(error);
+    //                     return;
+    //                 }
+    //                 aceito(results);
+    //             }
+    //         );
+    //     });
+    // },
+
     alterarProdutoOSDetalhes: (
         idOSDetalhes,
-        idProduto,
+        codigoBarras,
         quantidadeVendida,
-        precoTotal
+        precoTotal,
+        precoUnitario
     ) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "UPDATE Produto_has_OSDetalhes SET quantidadeVendida = ?, precoTotal = ? " +
-                    "WHERE idOSDetalhes = ? && idProduto = ?",
-                [quantidadeVendida, precoTotal, idOSDetalhes, idProduto],
+                "UPDATE Produto_has_OSDetalhes SET quantidadeVendida = ?, precoTotal = ?, precoUnitario = ? " +
+                    "WHERE idOSDetalhes = ? && codigoBarras = ?",
+                [
+                    quantidadeVendida,
+                    precoTotal,
+                    precoUnitario,
+                    idOSDetalhes,
+                    codigoBarras,
+                ],
                 (error, results) => {
                     if (error) {
                         rejeitado(error);

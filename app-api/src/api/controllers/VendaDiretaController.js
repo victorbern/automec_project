@@ -26,25 +26,26 @@ module.exports = {
             let jsonVendas = [];
             if (vendas) {
                 for (let j in vendas) {
-                    let produto = await ProdutoService.buscarPorId(
-                        vendas[j].idProduto
-                    ).catch((error) => {
-                        throw new AppError(error, 500);
-                    });
+                    let produto =
+                        await ProdutoService.buscaEspecificaCodigoBarras(
+                            vendas[j].codigoBarras
+                        ).catch((error) => {
+                            throw new AppError(error, 500);
+                        });
                     jsonVendas.push({
-                        idProduto: vendas[j].idProduto,
-                        codigoBarras: produto.codigoBarras,
+                        codigoBarras: vendas[j].codigoBarras,
                         descricao: produto.descricao,
-                        data: vendaDireta[i].data,
                         quantidadeVendida: vendas[j].quantidadeVendida,
                         precoTotal: vendas[j].precoTotal,
-                        precoVenda: produto.precoVenda,
+                        precoUnitario: vendas[j].precoUnitario,
                     });
                 }
             }
             json.result.push({
                 idVendaDireta: vendaDireta[i].idVendaDireta,
+                idPagamento: vendaDireta[i].idPagamento,
                 total: vendaDireta[i].total,
+                dataHora: vendaDireta[i].dataHora,
                 vendas: jsonVendas,
             });
         }
@@ -71,25 +72,24 @@ module.exports = {
         let jsonVendas = [];
         if (vendas) {
             for (let i in vendas) {
-                let produto = await ProdutoService.buscarPorId(
-                    vendas[i].idProduto
+                let produto = await ProdutoService.buscaEspecificaCodigoBarras(
+                    vendas[i].codigoBarras
                 ).catch((error) => {
                     throw new AppError(error, 500);
                 });
                 jsonVendas.push({
-                    idProduto: vendas[i].idProduto,
-                    codigoBarras: produto.codigoBarras,
+                    codigoBarras: vendas[i].codigoBarras,
                     descricao: produto.descricao,
-                    data: vendaDireta.dataHora,
                     quantidadeVendida: vendas[i].quantidadeVendida,
                     precoTotal: vendas[i].precoTotal,
-                    precoVenda: produto.precoVenda,
+                    precoUnitario: vendas[i].precoUnitario,
                 });
             }
         }
         json.result = {
             idVendaDireta: vendaDireta.idVendaDireta,
             total: vendaDireta.total,
+            dataHora: vendaDireta.dataHora,
             vendas: jsonVendas,
         };
 
@@ -119,7 +119,7 @@ module.exports = {
         for (let i in produtos) {
             let vendasDiretas_buscadas =
                 await VendaDiretaService.buscarVendasPorProduto(
-                    produtos[i].idProduto
+                    produtos[i].codigoBarras
                 ).catch((error) => {
                     throw new AppError(error, 500);
                 });
@@ -158,25 +158,25 @@ module.exports = {
             let jsonVendas = [];
             if (vendas) {
                 for (let j in vendas) {
-                    let produto = await ProdutoService.buscarPorId(
-                        vendas[j].idProduto
-                    ).catch((error) => {
-                        throw new AppError(error, 500);
-                    });
+                    let produto =
+                        await ProdutoService.buscaEspecificaCodigoBarras(
+                            vendas[j].codigoBarras
+                        ).catch((error) => {
+                            throw new AppError(error, 500);
+                        });
                     jsonVendas.push({
-                        idProduto: vendas[j].idProduto,
-                        codigoBarras: produto.codigoBarras,
+                        codigoBarras: vendas[j].codigoBarras,
                         descricao: produto.descricao,
-                        data: vendaDireta[i].data,
                         quantidadeVendida: vendas[j].quantidadeVendida,
                         precoTotal: vendas[j].precoTotal,
-                        precoVenda: produto.precoVenda,
+                        precoUnitario: vendas[j].precoUnitario,
                     });
                 }
             }
             json.result.push({
                 idVendaDireta: vendaDireta[i].idVendaDireta,
                 total: vendaDireta[i].total,
+                dataHora: vendaDireta[i].dataHora,
                 vendas: jsonVendas,
             });
         }
@@ -200,21 +200,15 @@ module.exports = {
             });
             if (valores.produtos) {
                 for (let i in valores.produtos) {
-                    let idProduto = valores.produtos[i].idProduto * 1;
+                    let codigoBarras = valores.produtos[i].codigoBarras;
                     let quantidadeVendida =
                         valores.produtos[i].quantidadeVendida * 1;
                     let precoTotal = valores.produtos[i].precoTotal * 1;
                     await VendaDiretaService.inserirProduto_has_VendaDireta(
                         IdVendaDireta,
-                        idProduto,
+                        codigoBarras,
                         quantidadeVendida,
                         precoTotal
-                    ).catch((error) => {
-                        throw new AppError(error, 500);
-                    });
-                    await ProdutoService.alterarEstoque(
-                        idProduto,
-                        quantidadeVendida * -1
                     ).catch((error) => {
                         throw new AppError(error, 500);
                     });
@@ -253,9 +247,10 @@ module.exports = {
             if (vendas) {
                 for (let i in vendas) {
                     vendasCadastradas.push({
-                        idProduto: vendas[i].idProduto,
+                        codigoBarras: vendas[i].codigoBarras,
                         quantidadeVendida: vendas[i].quantidadeVendida,
                         precoTotal: vendas[i].precoTotal,
+                        precoUnitario: vendas[i].precoUnitario,
                     });
                 }
             }
@@ -267,8 +262,8 @@ module.exports = {
                     let produtoExiste = false;
                     for (let j in valores.produtos) {
                         if (
-                            vendasCadastradas[i].idProduto ==
-                            valores.produtos[j].idProduto
+                            vendasCadastradas[i].codigoBarras ==
+                            valores.produtos[j].codigoBarras
                         ) {
                             produtoExiste = true;
                         }
@@ -276,7 +271,7 @@ module.exports = {
                     if (!produtoExiste) {
                         await VendaDiretaService.excluirProdutoVendaDireta(
                             idVendaDireta,
-                            vendasCadastradas[i].idProduto
+                            vendasCadastradas[i].codigoBarras
                         ).catch((error) => {
                             throw new AppError(error, 500);
                         });
@@ -285,27 +280,29 @@ module.exports = {
                 for (let i in valores.produtos) {
                     let venda = await VendaDiretaService.buscarVendaEspecifica(
                         idVendaDireta,
-                        valores.produtos[i].idProduto
+                        valores.produtos[i].codigoBarras
                     );
                     if (!venda) {
                         await VendaDiretaService.inserirProduto_has_VendaDireta(
                             idVendaDireta,
-                            valores.produtos[i].idProduto,
+                            valores.produtos[i].codigoBarras,
                             valores.produtos[i].quantidadeVendida,
-                            valores.produtos[i].precoTotal
+                            valores.produtos[i].precoTotal,
+                            valores.produtos[i].precoUnitario
                         );
-                        break;
                     }
                     if (
-                        venda.quantidadeVendida !==
+                        venda.quantidadeVendida !=
                             valores.produtos[i].quantidadeVendida ||
-                        venda.precoTotal !== valores.produtos[i].precoTotal
+                        venda.precoTotal != valores.produtos[i].precoTotal ||
+                        venda.precoUnitario != valores.produtos[i].precoUnitario
                     ) {
                         await VendaDiretaService.alterarProduto_has_VendaDireta(
                             idVendaDireta,
-                            valores.produtos[i].idProduto,
+                            valores.produtos[i].codigoBarras,
                             valores.produtos[i].quantidadeVendida,
-                            valores.produtos[i].precoTotal
+                            valores.produtos[i].precoTotal,
+                            valores.produtos[i].precoUnitario
                         );
                     }
                 }
@@ -331,7 +328,7 @@ module.exports = {
             for (let i in vendas) {
                 await VendaDiretaService.excluirProdutoVendaDireta(
                     vendas[i].idVendaDireta,
-                    vendas[i].idProduto
+                    vendas[i].codigoBarras
                 ).catch((error) => {
                     throw new AppError(error, 500);
                     res.json(json);
