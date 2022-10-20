@@ -162,7 +162,7 @@ module.exports = {
                     descricao: produto.descricao,
                     quantidadeVendida: vendas[i].quantidadeVendida,
                     precoUnitario: vendas[i].precoUnitario,
-                    precoTotal: produto.precoTotal,
+                    precoTotal: vendas[i].precoTotal,
                 });
             }
         }
@@ -314,6 +314,62 @@ module.exports = {
         res.json(json);
     },
 
+    fecharOrdemServicoPaga: async (idOrdemServico) => {
+        await OrdemServicoService.alterarStatus(idOrdemServico, true).catch(
+            (error) => {
+                throw new AppError(error, 500);
+            }
+        );
+        // Alterar estoque dos produtos vendidos pela OS
+        let osDetalhes = await OrdemServicoService.buscarOSDetalhes(
+            idOrdemServico
+        ).catch((error) => {
+            throw new AppError(error, 500);
+        });
+        let vendas = await OrdemServicoService.buscarVendaPorOSDetalhes(
+            osDetalhes.idOSDetalhes
+        ).catch((error) => {
+            throw new AppError(error, 500);
+        });
+        for (let j in vendas) {
+            await ProdutoService.alterarEstoque(
+                vendas[j].codigoBarras,
+                vendas[j].quantidadeVendida * -1
+            ).catch((error) => {
+                throw new AppError(error, 500);
+            });
+        }
+        // Fim da alteração no estoque dos produtos vendidos
+    },
+
+    abrirOrdemServicoPaga: async (idOrdemServico) => {
+        await OrdemServicoService.alterarStatus(idOrdemServico, false).catch(
+            (error) => {
+                throw new AppError(error, 500);
+            }
+        );
+        // Alterar estoque dos produtos vendidos pela OS
+        let osDetalhes = await OrdemServicoService.buscarOSDetalhes(
+            idOrdemServico
+        ).catch((error) => {
+            throw new AppError(error, 500);
+        });
+        let vendas = await OrdemServicoService.buscarVendaPorOSDetalhes(
+            osDetalhes.idOSDetalhes
+        ).catch((error) => {
+            throw new AppError(error, 500);
+        });
+        for (let j in vendas) {
+            await ProdutoService.alterarEstoque(
+                vendas[j].codigoBarras,
+                vendas[j].quantidadeVendida
+            ).catch((error) => {
+                throw new AppError(error, 500);
+            });
+        }
+        // Fim da alteração no estoque dos produtos vendidos
+    },
+
     inserirOrdemServico: async (req, res) => {
         // Cria o json que será devolvido no response
         let json = { error: "", result: "" };
@@ -327,7 +383,6 @@ module.exports = {
         let km = valores.km;
 
         // Verificar se todos os valores de produtos estão certos
-
         if (valores.produtos) {
             for (let i in valores.produtos) {
                 let codigoBarras = valores.produtos[i].codigoBarras;
@@ -492,6 +547,95 @@ module.exports = {
         let km = valores.km;
         let produtos = valores.produtos;
         let servicos = valores.servicos;
+        // Verificar se todos os valores de produtos estão certos
+        // console.log(servicos);
+        if (produtos) {
+            for (let i in produtos) {
+                let codigoBarras = produtos[i].codigoBarras;
+                let quantidadeVendida = produtos[i].quantidadeVendida * 1;
+                let precoTotal = produtos[i].precoTotal * 1;
+                let precoUnitario = produtos[i].precoUnitario * 1;
+
+                if (
+                    !codigoBarras ||
+                    !quantidadeVendida ||
+                    !precoTotal ||
+                    !precoUnitario
+                ) {
+                    console.log(codigoBarras);
+                    console.log(quantidadeVendida);
+                    console.log(precoTotal);
+                    console.log(precoUnitario);
+                    throw new AppError(
+                        "Um dos campos em produtos na posição " +
+                            i +
+                            " é nulo.",
+                        400
+                    );
+                }
+
+                let produto = await ProdutoService.buscaEspecificaCodigoBarras(
+                    codigoBarras
+                );
+
+                if (!produto) {
+                    throw new AppError(
+                        "O código de barras para o produto especificado não existe!",
+                        400
+                    );
+                }
+            }
+        }
+
+        // Verificar se todos os valores de produtos estão certos
+
+        if (servicos) {
+            for (let i in servicos) {
+                let idServico = servicos[i].idServico;
+                let idFuncionario = servicos[i].idFuncionario;
+                if (!idServico || !idFuncionario) {
+                    throw new AppError(
+                        "Um dos campos em serviços na posição " +
+                            i +
+                            " é nulo.",
+                        400
+                    );
+                }
+
+                let servico = await ServicoService.buscarPorId(idServico);
+
+                let funcionario = await FuncionarioService.buscarPorId(
+                    idFuncionario
+                );
+
+                if (!servico) {
+                    throw new AppError(
+                        "O id para o serviço especificado não existe!",
+                        400
+                    );
+                }
+
+                if (!funcionario) {
+                    throw new AppError(
+                        "O id para o funcionário especificado não existe!",
+                        400
+                    );
+                }
+            }
+        }
+
+        if (!idOrdemServico) {
+            throw new AppError(
+                "O campo idOrdemServico não pode ser nulo!",
+                400
+            );
+        }
+        if (!idCliente) {
+            throw new AppError("O campo idCliente não pode ser nulo!", 400);
+        }
+        if (!placaVeiculo) {
+            throw new AppError("O campo placaVeiculo não pode ser nulo!", 400);
+        }
 
         if (idOrdemServico && idCliente && placaVeiculo) {
             await OrdemServicoService.alterarOrdemServico(
@@ -512,6 +656,7 @@ module.exports = {
                 let vendas = await OrdemServicoService.buscarVendaPorOSDetalhes(
                     osDetalhes.idOSDetalhes
                 );
+                // console.log(vendas);
                 let produtosCadastrados = [];
                 if (vendas) {
                     for (let i in vendas) {
@@ -522,54 +667,54 @@ module.exports = {
                             precoTotal: vendas[i].precoTotal,
                         });
                     }
-                    if (
-                        qs.stringify(produtos) !==
-                        qs.stringify(produtosCadastrados)
-                    ) {
-                        for (let i in produtosCadastrados) {
-                            let produtoExiste = false;
-                            for (let j in produtos) {
-                                if (
-                                    produtosCadastrados[i].codigoBarras ==
-                                    produtos[j].codigoBarras
-                                ) {
-                                    produtoExiste = true;
-                                }
-                            }
-                            if (!produtoExiste) {
-                                await OrdemServicoService.excluirProdutoOSDetalhes(
-                                    osDetalhes.idOSDetalhes,
-                                    produtosCadastrados[i].codigoBarras
-                                );
+                }
+                if (
+                    qs.stringify(produtos) !== qs.stringify(produtosCadastrados)
+                ) {
+                    for (let i in produtosCadastrados) {
+                        let produtoExiste = false;
+                        for (let j in produtos) {
+                            if (
+                                produtosCadastrados[i].codigoBarras ==
+                                produtos[j].codigoBarras
+                            ) {
+                                produtoExiste = true;
                             }
                         }
-                        for (let i in produtos) {
-                            let venda =
-                                await OrdemServicoService.buscarProdutoOSDetalhes(
-                                    osDetalhes.idOSDetalhes,
-                                    produtos[i].codigoBarras
-                                );
-                            if (!venda) {
-                                await OrdemServicoService.inserirProdutoHasOSDetalhes(
-                                    produtos[i].codigoBarras,
-                                    osDetalhes.idOSDetalhes,
-                                    produtos[i].quantidadeVendida,
-                                    produtos[i].precoTotal
-                                );
-                                break;
-                            }
-                            if (
-                                venda.quantidadeVendida !==
-                                    produtos[i].quantidadeVendida ||
-                                venda.precoTotal !== produtos[i].precoTotal
-                            ) {
-                                await OrdemServicoService.alterarProdutoOSDetalhes(
-                                    osDetalhes.idOSDetalhes,
-                                    produtos[i].idProduto,
-                                    produtos[i].quantidadeVendida,
-                                    produtos[i].precoTotal
-                                );
-                            }
+                        if (!produtoExiste) {
+                            await OrdemServicoService.excluirProdutoOSDetalhes(
+                                osDetalhes.idOSDetalhes,
+                                produtosCadastrados[i].codigoBarras
+                            );
+                        }
+                    }
+                    for (let i in produtos) {
+                        let venda =
+                            await OrdemServicoService.buscarProdutoOSDetalhes(
+                                osDetalhes.idOSDetalhes,
+                                produtos[i].codigoBarras
+                            );
+                        if (!venda) {
+                            await OrdemServicoService.inserirProdutoHasOSDetalhes(
+                                produtos[i].codigoBarras,
+                                osDetalhes.idOSDetalhes,
+                                produtos[i].quantidadeVendida,
+                                produtos[i].precoTotal,
+                                produtos[i].precoUnitario
+                            );
+                        }
+                        if (
+                            venda.quantidadeVendida !==
+                                produtos[i].quantidadeVendida ||
+                            venda.precoTotal !== produtos[i].precoTotal
+                        ) {
+                            await OrdemServicoService.alterarProdutoOSDetalhes(
+                                osDetalhes.idOSDetalhes,
+                                produtos[i].codigoBarras,
+                                produtos[i].quantidadeVendida,
+                                produtos[i].precoTotal,
+                                produtos[i].precoUnitario
+                            );
                         }
                     }
                 }
@@ -578,8 +723,8 @@ module.exports = {
                         osDetalhes.idOSDetalhes
                     );
 
+                let servicosCadastrados = [];
                 if (executaFuncao) {
-                    let servicosCadastrados = [];
                     for (let i in executaFuncao) {
                         servicosCadastrados.push({
                             idServico: executaFuncao[i].idServico,
@@ -587,57 +732,63 @@ module.exports = {
                             observacao: executaFuncao[i].observacao,
                         });
                     }
-                    if (
-                        qs.stringify(servicosCadastrados) !==
-                        qs.stringify(servicos)
-                    ) {
-                        for (let i in servicosCadastrados) {
-                            let servicoExiste = false;
-                            for (let j in servicos) {
-                                if (
-                                    servicosCadastrados[i].idServico ==
-                                        servicos[j].idServico &&
-                                    servicosCadastrados[i].idFuncionario ==
-                                        servicos[j].idFuncionario
-                                ) {
-                                    servicoExiste = true;
-                                }
-                            }
-                            if (!servicoExiste) {
-                                await OrdemServicoService.excluirExecutaFuncao(
-                                    osDetalhes.idOSDetalhes,
-                                    servicosCadastrados[i].idServico,
-                                    servicosCadastrados[i].idFuncionario
-                                );
+                }
+                // console.log(servicosCadastrados);
+                if (
+                    qs.stringify(servicosCadastrados) !== qs.stringify(servicos)
+                ) {
+                    for (let i in servicosCadastrados) {
+                        let servicoExiste = false;
+                        for (let j in servicos) {
+                            if (
+                                servicosCadastrados[i].idServico ==
+                                    servicos[j].idServico &&
+                                servicosCadastrados[i].idFuncionario ==
+                                    servicos[j].idFuncionario
+                            ) {
+                                servicoExiste = true;
                             }
                         }
-                        for (let i in servicos) {
-                            let execucao =
-                                await OrdemServicoService.buscarExecutaFuncaoEspecifica(
-                                    osDetalhes.idOSDetalhes,
-                                    servicos[i].idServico
-                                );
-                            if (!execucao) {
-                                await OrdemServicoService.inserirExecutaFuncao(
-                                    servicos[i].idServico,
-                                    servicos[i].idFuncionario,
-                                    servicos[i].observacao,
-                                    osDetalhes.idOSDetalhes
-                                );
-                                break;
-                            }
-                            if (execucao.observacao != servicos[i].observacao) {
-                                await OrdemServicoService.alterarExecutaFuncao(
-                                    servicos[i].idServico,
-                                    servicos[i].idFuncionario,
-                                    servicos[i].observacao,
-                                    osDetalhes.idOSDetalhes
-                                );
-                            }
+                        if (!servicoExiste) {
+                            await OrdemServicoService.excluirExecutaFuncao(
+                                osDetalhes.idOSDetalhes,
+                                servicosCadastrados[i].idServico,
+                                servicosCadastrados[i].idFuncionario
+                            );
+                        }
+                    }
+                    for (let i in servicos) {
+                        let execucao =
+                            await OrdemServicoService.buscarExecutaFuncaoEspecifica(
+                                osDetalhes.idOSDetalhes,
+                                servicos[i].idServico,
+                                servicos[i].idFuncionario
+                            );
+                        if (!execucao) {
+                            await OrdemServicoService.inserirExecutaFuncao(
+                                servicos[i].idServico,
+                                servicos[i].idFuncionario,
+                                servicos[i].observacao,
+                                osDetalhes.idOSDetalhes
+                            );
+                        }
+                        if (execucao.observacao != servicos[i].observacao) {
+                            await OrdemServicoService.alterarExecutaFuncao(
+                                servicos[i].idServico,
+                                servicos[i].idFuncionario,
+                                servicos[i].observacao,
+                                osDetalhes.idOSDetalhes
+                            );
                         }
                     }
                 }
+            } else {
+                throw new AppError(
+                    "Não foram encontradas OSDetalhes para esta Ordem de Serviço",
+                    400
+                );
             }
+
             json.result = "Dados enviados";
         } else {
             throw new AppError("Campos não enviados", 400);
@@ -663,7 +814,7 @@ module.exports = {
                     for (let i in vendas) {
                         await OrdemServicoService.excluirProdutoOSDetalhes(
                             osDetalhes.idOSDetalhes,
-                            vendas[i].idProduto
+                            vendas[i].codigoBarras
                         );
                     }
                 }
