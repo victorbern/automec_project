@@ -277,7 +277,7 @@ module.exports = {
                     }
                 }
             }
-            json.result = "Campos enviados";
+            json.result = { idPagamento: IdPagamento };
         } else {
             throw new AppError("Campos não enviados", 400);
         }
@@ -351,6 +351,8 @@ module.exports = {
                 idPagamento
             );
 
+            console.log();
+
             if (vendaDireta) {
                 // Percorre todas as vendas de venda direta para excluir Produto_has_VendaDireta uma por uma
                 let vendas =
@@ -363,6 +365,12 @@ module.exports = {
                     await VendaDiretaService.excluirProdutoVendaDireta(
                         vendaDireta.idVendaDireta,
                         vendas[i].codigoBarras
+                    ).catch((error) => {
+                        throw new AppError(error, 500);
+                    });
+                    await ProdutoService.alterarEstoque(
+                        vendas[i].codigoBarras,
+                        vendas[i].quantidadeVendida
                     ).catch((error) => {
                         throw new AppError(error, 500);
                     });

@@ -5,6 +5,7 @@ const verifyToken = (req, res, next) => {
     const token = authHeader && authHeader.split(" ")[1];
 
     if (!token) {
+        console.log("Acesso negado!");
         return res.status(401).json({ msg: "Acesso negado!" });
     }
 
@@ -15,6 +16,7 @@ const verifyToken = (req, res, next) => {
 
         next();
     } catch (error) {
+        console.log("Token inválido!");
         res.status(400).json({ msg: "Token inválido!" });
     }
 };

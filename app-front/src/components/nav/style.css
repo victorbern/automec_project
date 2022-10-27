@@ -12,6 +12,7 @@
     font-family: 'Roboto', sans-serif;
     font-size: 30px;
 }
+
 .navbar{
     padding: 0 !important;
     border-color: #0D0F36 !important;
@@ -26,7 +27,18 @@
     width: 100%;
 }
 
+.userNav {
+    font-family: 'Roboto', sans-serif;
+    font-size: 18px;
+    color: #0D0F36 !important;
+    text-decoration: none;
+}
+
 .logo img {
     margin-right: 10px;
     color: #ffffff !important;
+}
+
+.userLogo{
+    margin-right: 10px;
 }
