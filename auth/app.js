@@ -5,10 +5,12 @@ const User = require("./models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const auth = require("./middleware/auth");
+const cors = require("cors");
 
 const app = express();
 
 app.use(express.json());
+app.use(cors());
 
 // Logic goes here
 
@@ -58,7 +60,6 @@ app.post("/auth/registrar", async (req, res) => {
 });
 
 app.post("/auth/login", async (req, res) => {
-    console.log(req.body);
     const { email, password } = req.body;
 
     if (!email) {

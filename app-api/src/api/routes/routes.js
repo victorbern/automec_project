@@ -6,6 +6,7 @@ const FuncionarioController = require("../controllers/FuncionarioController");
 const OrdemServicoController = require("../controllers/OrdemServicoController");
 const PagamentoController = require("../controllers/PagamentoController");
 const ProdutoController = require("../controllers/ProdutoController");
+const RelatorioController = require("../controllers/RelatorioController");
 const ServicoController = require("../controllers/ServicoController");
 const VeiculoController = require("../controllers/VeiculoController");
 const VendaDiretaController = require("../controllers/VendaDiretaController");
@@ -79,4 +80,7 @@ router.post("/pagamento", PagamentoController.inserirPagamento); // Inserir novo
 router.delete("/pagamento/:id", PagamentoController.excluirPagamento); // Deletar um cliente do banco de dados
 // router.get("/clientes/:valor", ClienteController.buscaPorValor); // Buscar cliente por nome e/ou cpfCnpj
 
+router.post("/relatorio/pagamentos", RelatorioController.buscarPagamentos);
+router.post("/relatorio/ordens-servico", RelatorioController.buscarOrdens);
+router.post("/relatorio/produtos", RelatorioController.buscarProdutos);
 module.exports = router;

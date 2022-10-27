@@ -12,32 +12,34 @@ import vd from '../../static/vd.png'
 import relatorios from '../../static/relatorios.png'
 import pagamento from '../../static/pagamento.png'
 
-function Home(){
+function Home(props){
+    
+    props.funcNav(true);
     return(
         <>
         <div class="card-deck">
 
                 <Card class="card" as={Link} to="/clientes">
                     <div class="card-body">
-                        <img src={clientes}/>
+                        <img alt='clientes' src={clientes}/>
                     </div>
                     <div class="card-footer">
                             Clientes
                     </div>
                 </Card>
 
-                <Card class="card">
+                <Card class="card" as={Link} to="/veiculos">
                     <div class="card-body">
-                        <img src={veiculos}/>
+                        <img alt='veiculos' src={veiculos}/>
                     </div>
                     <div class="card-footer">
                             Veículos
                     </div>
                 </Card>
 
-                <Card class="card">
+                <Card class="card" as={Link} to="/produtos">
                     <div class="card-body">
-                        <img src={produtos}/>
+                        <img alt='produtos' src={produtos}/>
                     </div>
                     <div class="card-footer">
                             Produtos
@@ -48,27 +50,27 @@ function Home(){
 
             <div class="card-deck">
 
-                <Card class="card">
+                <Card class="card" as={Link} to="/funcionarios">
                     <div class="card-body">
-                        <img src={funcionarios}/>
+                        <img alt='funcionarios' src={funcionarios}/>
                     </div>
                     <div class="card-footer">
                             Funcionários
                     </div>
                 </Card>
 
-                <Card class="card">
+                <Card class="card" as={Link} to="/servicos">
                     <div class="card-body">
-                        <img src={servicos}/>
+                        <img alt='servicos' src={servicos}/>
                     </div>
                     <div class="card-footer">
                             Serviços
                     </div>
                 </Card>
 
-                <Card class="card">
+                <Card class="card" as={Link} to="/ordens-servico">
                     <div class="card-body">
-                        <img src={os}/>
+                        <img alt='os' src={os}/>
                     </div>
                     <div class="card-footer">
                             Ordens de Serviços
@@ -79,27 +81,27 @@ function Home(){
 
                 <div class="card-deck">
 
-                    <Card class="card">
+                    {/* {   <Card class="card">
                         <div class="card-body">
-                            <img src={vd}/>
+                            <img alt='vd' src={vd}/>
                         </div>
                         <div class="card-footer">
                                 Venda Direta
                         </div>
-                    </Card>
-
+                    </Card> */}
+                
                     <Card class="card">
                         <div class="card-body">
-                            <img src={relatorios}/>
+                            <img alt='relatorios' src={relatorios}/>
                         </div>
                         <div class="card-footer">
                                 Relatórios
                         </div>
                     </Card>
 
-                    <Card class="card">
+                    <Card class="card" as={Link} to="/pagamentos">
                         <div class="card-body">
-                            <img src={pagamento}/>
+                            <img alt='pagamento' src={pagamento}/>
                         </div>
                         <div class="card-footer">
                                 Pagamento

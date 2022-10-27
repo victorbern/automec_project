@@ -13,6 +13,7 @@ module.exports = {
     buscarTodos: async (req, res) => {
         // Cria o json que será devolvido no response
         let json = { error: "", result: [] };
+
         // Busca todas as ordens de serviços cadastradas no banco de dados
         let ordens = await OrdemServicoService.buscarTodos().catch((error) => {
             throw new AppError(error, 500);
@@ -215,7 +216,9 @@ module.exports = {
         // Adicionar verificação para ver se valor é numérico
         ordem = await OrdemServicoService.buscarPorId(valor);
         if (ordem) {
-            ordens.push(ordem);
+            if (!(await OrdemServicoService.isPaga(ordem.idOrdemServico))) {
+                ordens.push(ordem);
+            }
         }
         for (let i in clientes) {
             ordem = await OrdemServicoService.buscaPorIdCliente(

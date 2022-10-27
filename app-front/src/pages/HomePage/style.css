@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Roboto:wght@700&display=swap');
+
+.card-deck{
+    display: flex;
+    margin-top: 5.5rem;
+    margin-bottom: 5.5rem;
+    width: 100%;
+    justify-content: center;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    border: 3px solid #294380 !important;
+    margin-right: 2.5rem;
+    margin-left: 2.5rem !important;
+    border-radius: 10px !important;
+    min-width: 250px !important;
+    max-width: 250px !important;
+    min-height: 250px !important;
+    text-decoration: none;
+}
+
+.card-body {
+    background-color: #294380;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Roboto', sans-serif;
+    font-size: 24px;
+    color: #0D0F36 !important;
+}
+
+@media screen and (max-width: 935px) { 
+    .card-deck {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    
+    .card {
+      margin-left: 0;
+      margin-bottom: 5rem;
+    }
+
+    .card:last-child {
+      margin-bottom: 0;
+    }
+}
