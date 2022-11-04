@@ -1,15 +1,14 @@
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from "pdfmake/build/vfs_fonts";
+import logo from '../../../static/logo.jpg'
 
 function ordensServicoPDF(ordensServico){
     pdfMake.vfs = pdfFonts.pdfMake.vfs;
     // alert(pagamentos.total)
     const reportTitle = [
         {
-            text: 'Ordens de Serviços',
-            fontSize: 24,
-            bold: true,
-            margin: [15,20,0,45] // left, top, right, bottom
+            image: logo,
+            fit:[140,70]
         }
     ];
 
@@ -32,6 +31,13 @@ function ordensServicoPDF(ordensServico){
     });
 
     const details = [
+        {
+            text: 'Ordens de Serviços',
+            fontSize: 24,
+            bold: true,
+            // margin: [15,20,0,45] // left, top, right, bottom
+            alignment:'center'
+        },
         {text: 'Total Geral: '+ ordensServico.total.toFixed(2), fontSize: 14, bold: true, margin: [0, 20, 0, 8]},
         {text: 'Pagas | Total: '+ ordensServico.subtotalPagas.toFixed(2), fontSize: 14, bold: true, margin: [0, 20, 0, 8]},
         {

@@ -1,16 +1,16 @@
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from "pdfmake/build/vfs_fonts";
+import logo from '../../../static/logo.jpg'
 
 function pagamentosPDF(pagamentos){
     pdfMake.vfs = pdfFonts.pdfMake.vfs;
     // alert(pagamentos.total)
+
+
     const reportTitle = [
         {
-            image: '../static/logo.png',
-            text: 'Pagamentos',
-            fontSize: 24,
-            bold: true,
-            margin: [15,20,0,45] // left, top, right, bottom
+            image: logo,
+            fit:[140,70]
         }
     ];
 
@@ -48,6 +48,13 @@ function pagamentosPDF(pagamentos){
     }
 
     const details = [
+        {
+            text: 'Pagamentos',
+            fontSize: 24,
+            bold: true,
+            // margin: [15,20,0,45] // left, top, right, bottom
+            alignment:'center'
+        },
         {text: 'Total geral: '+ (pagamentos.total).toFixed(2), fontSize: 14, margin: [0, 20, 0, 8]},
         ...tipos
     ];

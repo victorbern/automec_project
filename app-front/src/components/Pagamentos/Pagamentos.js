@@ -7,6 +7,8 @@ import ModalDetalhar from "./ModalDetalhar";
 import ModalExcluir from "./ModalExcluir";
 import Header from "../Header/Header";
 import Listagem from "../Listagem/Listagem";
+import comprovantePDF from "../Relatorio/Reports/comprovante";
+import {Form,Col,Row,Button,Modal} from 'react-bootstrap';
 
 class Pagamentos extends React.Component {
 
@@ -16,7 +18,7 @@ class Pagamentos extends React.Component {
         this.state = {
             idPagamento: 0, subtotal:0, total: 0,formaPagamento: '', desconto: '', dataHora:'', 
             codigoBarras:'', descricao: '', precoUnitario:'',precoVenda:'', quantidadeVendida:'', precoTotal:0,
-            idOrdemServico: '', nomeCliente: '', placaVeiculo: '', totalOS:'', 
+            idOrdemServico: '', nomeCliente: '', placaVeiculo: '', totalOS:'', idPg:0, pagamento:'', gerar: false,comprovante:[],
             produtos:[], ordensServico:[],
             vendaDireta:[], produtosVendidos:[],OSSelecionadas: [],
             input: false, modalIncluir:false, modalDetalhar:false, modalExcluir:false,clearOS:false, clearP:false,atualizaOS: false,
@@ -58,24 +60,31 @@ class Pagamentos extends React.Component {
     }
 
     componentDidMount(){
-        this.getData();
+        this.getData("");
         this.getProdutos("");
         this.getOdensServico("");
     }
     
     componentDidUpdate() {
-        // this.getData();
+        // this.getData("");
         this.atualizaSubTotal();
         if(this.state.atualizaOS){
             this.getOdensServico("");
         }
+        if(this.state.codigoBarras != '') {
+            this.getProdutos("");
+        }
+        // if(this.state.gerar){
+        //     comprovantePDF(this.state.comprovante)
+        // }
     }
 
     componentWillUnmount(){
+        this.getData("");
     }
 
-    getData() {
-        fetch('http://localhost:3000/api/pagamentos',
+    getData(valor) {
+        fetch('http://localhost:3000/api/pagamentos/'+valor,
         {
             headers: {
                     'Authorization': 'Bearer ' + localStorage.getItem('token'),
@@ -83,30 +92,6 @@ class Pagamentos extends React.Component {
         })
         .then(resposta => resposta.json())
         .then(dados => {
-            const pagamentos = dados.result;
-            pagamentos.map((pg) => {
-                let data = new Date((pg.dataHora).split("T")[0]);
-                pg.dataHora = data.toLocaleDateString('pt-BR', {timeZone: 'UTC'});
-            });
-            var slice = pagamentos.slice(this.state.offset, this.state.offset + this.state.perPage)
-            this.setState(() => {
-                return {
-                pageCount: Math.ceil(pagamentos.length / this.state.perPage),
-                orgtableData : pagamentos,
-                tableData:slice
-                }
-            });
-        });
-    }
-
-    getData1 = (id) => {
-        fetch("http://localhost:3000/api/pagamento/"+id, {method: 'GET',
-        headers: {
-            'Authorization': 'Bearer ' + localStorage.getItem('token'),
-    }})
-        .then(resposta => resposta.json())
-        .then(dados => {
-
             const pagamentos = dados.result;
             pagamentos.map((pg) => {
                 let data = new Date((pg.dataHora).split("T")[0]);
@@ -162,29 +147,83 @@ class Pagamentos extends React.Component {
             });
         });
     }
-    
-    incluirPagamento = (pagamento) => {
-        fetch("http://localhost:3000/api/pagamento", {
-            method: 'POST',
-            headers: {'Content-Type':'application/x-www-form-urlencoded',
-            'Authorization': 'Bearer ' + localStorage.getItem('token'),},
-            body: qs.stringify(pagamento)
-        })
-        .then(resposta => {
-            if(resposta.ok){
-                this.getData("");
-            } else {
-                alert('Não foi possível incluir o Pagamento!')
+
+    getPagamento(id) {
+        fetch('http://localhost:3000/api/pagamento/'+id,
+        {
+            headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('token'),
             }
         })
-        this.fecharModalIncluir()
+        .then(resposta => resposta.json())
+        .then(dados => {
+            const pagamento = dados.result;
+            this.setState(() => {
+                return {
+                pagamento: pagamento
+                }
+            });
+        });
     }
+
+    
+    incluirPagamento = (pagamento) => {
+
+    fetch("http://localhost:3000/api/pagamento", {
+            method: 'POST',
+            headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('token'),
+            'Content-Type':'application/x-www-form-urlencoded',
+            },
+            body: qs.stringify(pagamento)
+        })
+        .then(resposta => resposta.json())
+        .then(dados => {
+            const comprovante = dados.result;
+            // this.setState(() => {
+            //     return {
+            //         comprovante: comprovante,
+            //     }
+            // });
+        });
+        
+    //    await fetch("http://localhost:3000/api/pagamento", {
+    //         method: "POST",
+    //         headers: {
+    //             "Content-Type": "application/x-www-form-urlencoded",
+    //             Authorization: "Bearer " + localStorage.getItem("token"),
+    //         },
+    //         body: qs.stringify(pagamento),
+    //         mode:"cors",
+    //     })
+    //         .then((resposta) => resposta.json())
+    //         .then((resposta) => {
+                
+    //         // this.getData("")
+    //         //    alert(resposta.result.idPagamento);
+    //             let pag = resposta.result;
+                
+    //             alert(pag);
+    //             // comprovantePDF(pag)
+    //             this.setState(() => {
+    //                 return {
+    //                 comprovante : pag
+    //                 }
+    //             });
+    //             // this.gerarPDF(pag)
+    //         })
+    //         .catch((error) => {
+    //             alert(error);
+    //             alert("Não foi possível incluir o Pagamento!");
+    //         });
+        this.fecharModalIncluir();
+    };
 
     deletarPagamento = (id) => {
         fetch("http://localhost:3000/api/pagamento/"+id, {method: 'DELETE',
         headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('token'),
-    }})
+        }})
         .then(resposta => {
             if(resposta.ok){
                 this.getData("");
@@ -204,7 +243,8 @@ class Pagamentos extends React.Component {
     fecharModalIncluir = () => {
         this.setState(
             {
-                modalIncluir:false
+                modalIncluir:false,
+                gerar:true,
             }
         )
     }
@@ -254,6 +294,7 @@ class Pagamentos extends React.Component {
                 desconto: pagamento.desconto, 
                 OSSelecionadas: pagamento.ordensServico,
                 produtosVendidos: pagamento.vendaDireta,
+                comprovante:pagamento,
                 input: true,
             }
         )
@@ -306,58 +347,58 @@ class Pagamentos extends React.Component {
                 descricao: campos[1],
                 quantidadeVendida: 1,
                 precoVenda: campos[2],
-                clearP:false,
+                clearP:false
                 //produtosVendidos: this.state.produtosVendidos.push(produtoSelecionado)
             }
         });
     }
+    atualizaCamposACOrdensServico = (ordemServico) => {
 
-    atualizaCamposACOrdensServico = (ordemServico) => {   
-        const valor = (ordemServico.target.value);
-        const campos = valor.split(" - ");
+        // const valor = (ordemServico.target.value);
+        // const campos = valor.split(" - ");
 
-        let cliente = {nomeCliente: campos[1]}
-        let veiculo = {placaVeiculo: campos[2]}
+        // let cliente = {nomeCliente: campos[1]}
+        // let veiculo = {placaVeiculo: campos[2]}
 
-        const ordemServicoSelecionada = {
-            idOrdemServico: campos[0],
-            cliente: cliente,
-            veiculo:veiculo,
-            total: campos[3],
-        }
+        // const ordemServicoSelecionada = {
+        //     idOrdemServico: campos[0]*1,
+        //     cliente: cliente,
+        //     veiculo:veiculo,
+        //     total: campos[3]*1,
+        // }
 
-        let inserir = false;
+        // // console.log("entro"+ordemServicoSelecionada.idOrdemServico)
 
-        this.state.ordensServico.map((os) => {
-            if(os.idOrdemServico == ordemServicoSelecionada.idOrdemServico && 
-                os.cliente.nomeCliente === ordemServicoSelecionada.cliente.nomeCliente && os.veiculo.placaVeiculo == ordemServicoSelecionada.veiculo.placaVeiculo 
-                && os.total == ordemServicoSelecionada.total){
-                    inserir = true;
-            }
-        });
+        let inserir = true;
 
-        console.log(this.state.OSSelecionadas)
+        // this.state.ordensServico.map((os) => {
+        //     if(os.idOrdemServico === ordemServicoSelecionada.idOrdemServico && 
+        //         os.cliente.nomeCliente === ordemServicoSelecionada.cliente.nomeCliente && os.veiculo.placaVeiculo === ordemServicoSelecionada.veiculo.placaVeiculo 
+        //         && os.total === ordemServicoSelecionada.total){
+        //             console.log("entraste")
+        //             inserir = true;
+        //     }
+        // });
 
         this.state.OSSelecionadas.map((os) => {
-            if(os.idOrdemServico == ordemServicoSelecionada.idOrdemServico){
+            if(os.idOrdemServico == ordemServico.idOrdemServico){
                 inserir = false;
             }
         });
 
         if(inserir) {
-            this.state.OSSelecionadas.push(ordemServicoSelecionada)
+            this.state.OSSelecionadas.push(ordemServico);
         }
 
         this.setState(() => {
             return {
-            idOrdemServico: campos[0],
-            nomeCliente: campos[1],
-            placaVeiculo: campos[2],
-            totalOS: campos[3],
+            idOrdemServico: ordemServico.idOrdemServico,
+            nomeCliente: ordemServico.cliente.nomeCliente,
+            placaVeiculo: ordemServico.veiculo.placaVeiculo,
+            totalOS: ordemServico.total,
             clearOS:false,
             }
         });
-
     }
 
     atualizaFormaPagamento = (e) => {
@@ -381,7 +422,8 @@ class Pagamentos extends React.Component {
             total: 0,
             produtos: this.state.produtosVendidos
         }
-        const pagamento = {           
+        const pagamento = {         
+            idPagamento: '',  
             formaPagamento: this.state.formaPagamento,
             desconto: this.state.desconto,
             subtotal: 0,
@@ -390,6 +432,13 @@ class Pagamentos extends React.Component {
             vendaDireta: vendaDireta,
         }
     this.incluirPagamento(pagamento)
+
+    // this.setState(
+    //     {
+    //         gerar: true
+    //     }
+    // )
+
     }
 
     zerarPagamentoState = () => {

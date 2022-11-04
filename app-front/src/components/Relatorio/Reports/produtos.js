@@ -1,15 +1,14 @@
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from "pdfmake/build/vfs_fonts";
+import logo from '../../../static/logo.jpg'
 
 function produtosPDF(produtos){
     pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
     const reportTitle = [
         {
-            text: 'Produtos mais vendidos',
-            fontSize: 24,
-            bold: true,
-            margin: [15,20,0,45] // left, top, right, bottom
+            image: logo,
+            fit:[140,70]
         }
     ];
 
@@ -22,7 +21,13 @@ function produtosPDF(produtos){
     });
 
     const details = [
-//        {text: 'KENNEDY GATÃO', fontSize: 14, bold: true, margin: [0, 20, 0, 8]},
+        {
+            text: 'Produtos mais vendidos',
+            fontSize: 24,
+            bold: true,
+            margin: [0,0,0,20], // left, top, right, bottom
+            alignment:'center'
+        },
         {
             table: {
                 headerRows: 1,

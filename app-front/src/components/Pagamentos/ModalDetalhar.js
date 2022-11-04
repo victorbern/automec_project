@@ -3,6 +3,9 @@ import {Form,Col,Row,Button,Modal} from 'react-bootstrap';
 import AutocompleteProdutos from "../Autocompletes/AutocompleteProdutos";
 import AutocompleteOS from "../Autocompletes/AutocompleteOS";
 import deleta from '../../static/deleta.png'
+import comprovantePDF from "../Relatorio/Reports/comprovante";
+
+import comprovante from '../../static/comprovante.png'
 
 export default function ModalDetalhar(props){
     let totalVendido = 0;
@@ -97,7 +100,7 @@ export default function ModalDetalhar(props){
                                     <td>{produto.codigoBarras}</td>
                                     <td>{produto.descricao}</td>
                                     <Col xs={2}>
-                                    <td> <Form.Control type="number" value={produto.quantidadeVendida} onChange={(e) => produto.quantidadeVendida = e.target.value} /></td>
+                                    <td> <Form.Control disabled={props.state.input} type="number" value={produto.quantidadeVendida} onChange={(e) => produto.quantidadeVendida = e.target.value} /></td>
                                     </Col>
                                     <td>{produto.precoTotal}</td>
                                     <img alt='delete' src={deleta} onClick={ props.state.input ? "" : () => props.excluirProduto(produto)} />
@@ -137,6 +140,7 @@ export default function ModalDetalhar(props){
             </Modal.Body>
 
             <Modal.Footer className="footer">
+                <Button className="btnOk" onClick={() => comprovantePDF(props.state.comprovante)}><img alt='comprovante' src={comprovante}/> Comprovante</Button>
                 <Button className="btnOkDel" onClick={() => props.abrirModalExcluir()}>Cancelar Pagamento</Button>
             </Modal.Footer>
 

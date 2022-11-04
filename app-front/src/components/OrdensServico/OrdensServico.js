@@ -331,8 +331,11 @@ class OrdensServico extends React.Component {
         this.setState(
             {
                 idCliente: campos[0],
+                // idCliente: cliente.idCliente,
                 nomeCliente: campos[1],
+                // nomeCliente: cliente.nomeCliente,
                 celularCliente: campos[2],
+                // celularCliente: cliente.celularCliente,
             }
         )
     }

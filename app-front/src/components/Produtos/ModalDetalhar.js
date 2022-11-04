@@ -22,7 +22,7 @@ export default function ModalDetalhar(props){
                 <Row className="mb-3">
                     <Col xs={8} controlId="formGridcodBarras">
                         <Form.Label>Código de Barras*</Form.Label>
-                        <Form.Control value={props.state.codigoBarras} disabled={props.state.input} onChange={props.atualizaCodigoBarras} required />
+                        <Form.Control value={props.state.codigoBarras} disabled={true} onChange={props.atualizaCodigoBarras} required />
                     </Col>
 
                     <Col controlId="formGridDescricao">
