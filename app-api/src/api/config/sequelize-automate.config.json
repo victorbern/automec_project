@@ -1,6 +1,6 @@
 {
     "dbOptions": {
-        "database": "automec_sq2",
+        "database": "automec_v7",
         "username": "root",
         "password": "",
         "dialect": "mysql",

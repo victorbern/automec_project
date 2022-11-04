@@ -2,7 +2,7 @@
   "development": {
     "username": "root",
     "password": null,
-    "database": "automec_sq2",
+    "database": "automec_v7",
     "host": "127.0.0.1",
     "dialect": "mysql",
     "define": {
@@ -12,14 +12,14 @@
   "test": {
     "username": "root",
     "password": null,
-    "database": "database_test",
+    "database": "automec_v7",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },
   "production": {
     "username": "root",
     "password": null,
-    "database": "database_production",
+    "database": "automec_v7",
     "host": "127.0.0.1",
     "dialect": "mysql"
   }

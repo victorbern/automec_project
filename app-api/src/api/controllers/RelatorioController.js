@@ -127,29 +127,41 @@ module.exports = {
         let dataDe = req.body.dataDe;
         let dataAte = req.body.dataAte;
 
+        dataDe = sd.format(dataDe, "YYYY-MM-DD");
+        dataAte = sd.format(dataAte, "YYYY-MM-DD");
+
         let vendasOS = await RelatorioService.buscarProdutosOrdemServico(
             dataDe,
             dataAte
         ).catch((error) => {
             throw new AppError(error, 500);
         });
+
         let vendasVD = await RelatorioService.buscarProdutosVendaDireta(
             dataDe,
             dataAte
         ).catch((error) => {
             throw new AppError(error, 500);
         });
-        let vendas = vendasOS;
-        vendas.forEach((venda, index, array) => {
+
+        vendasOS.forEach((vendaOS, index, array) => {
             let found = vendasVD.find(
-                (vendaVD) => vendaVD.codigoBarras == venda.codigoBarras
+                (vendaVD) => vendaVD.codigoBarras == vendaOS.codigoBarras
             );
             if (found) {
-                venda.totalVendido =
-                    venda.totalVendido * 1 + found.totalVendido * 1;
+                vendaOS.totalVendido =
+                    vendaOS.totalVendido * 1 + found.totalVendido * 1;
             }
         });
-
+        let vendas = vendasOS;
+        vendasVD.forEach((vendaVD, index, array) => {
+            let found = vendas.find(
+                (venda) => venda.codigoBarras == vendaVD.codigoBarras
+            );
+            if (!found) {
+                vendas.push(vendaVD);
+            }
+        });
         vendas.sort(function (a, b) {
             if (a.totalVendido > b.totalVendido) {
                 return -1;
@@ -159,7 +171,6 @@ module.exports = {
             }
             return 0;
         });
-
         json.result = vendas;
         res.json(json);
     },

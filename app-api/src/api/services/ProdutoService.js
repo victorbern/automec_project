@@ -118,14 +118,8 @@ module.exports = {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
                 "UPDATE produto SET descricao = ?, valorCusto = ?," +
-                    "quantidadeEstoque = ?, precoVenda = ? WHERE codigoBarras = ?",
-                [
-                    descricao,
-                    valorCusto,
-                    quantidadeEstoque,
-                    precoVenda,
-                    codigoBarras,
-                ],
+                    " precoVenda = ? WHERE codigoBarras = ?",
+                [descricao, valorCusto, precoVenda, codigoBarras],
                 (error, results) => {
                     if (error) {
                         rejeitado(error);

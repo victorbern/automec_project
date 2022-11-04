@@ -14,7 +14,7 @@ const routes = require("./api/routes/routes");
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use("/api", auth, routes);
+app.use("/api", /*auth,*/ routes);
 app.get("/", (req, res) => res.send("Aplicação Rodando!"));
 
 app.use((error, req, res, next) => {

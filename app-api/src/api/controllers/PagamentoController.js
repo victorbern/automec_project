@@ -63,6 +63,12 @@ module.exports = {
                         throw new AppError(error, 500);
                     });
                     if (ordemServico) {
+                        let detalheOS =
+                            await OrdemServicoService.buscarOSDetalhes(
+                                ordemServico.idOrdemServico
+                            ).catch((error) => {
+                                throw new AppError(error, 500);
+                            });
                         // Buscamos no banco de dados os valores referentes ao cliente desta ordem de serviço especificada
                         let cliente = await ClienteService.buscarPorId(
                             ordemServico.idCliente
@@ -76,6 +82,7 @@ module.exports = {
                         pagamento.ordensServico.push({
                             idOrdemServico: ordemServico.idOrdemServico,
                             total: ordemServico.total,
+                            dataOS: detalheOS.dataOS,
                             km: ordemServico.km,
                             cliente: cliente,
                             veiculo: veiculo,
@@ -161,6 +168,11 @@ module.exports = {
                     throw new AppError(error, 500);
                 });
                 if (ordemServico) {
+                    let detalheOS = await OrdemServicoService.buscarOSDetalhes(
+                        ordemServico.idOrdemServico
+                    ).catch((error) => {
+                        throw new AppError(error, 500);
+                    });
                     let cliente = await ClienteService.buscarPorId(
                         ordemServico.idCliente
                     );
@@ -169,13 +181,14 @@ module.exports = {
                     );
                     // Estou exibindo todos os dados de cliente e de veículo, porque caso um deles seja nulo,
                     //  eu exibir apenas um atributo (como cliente.nomeCliente) vai quebrar o backend
-                    json.result.ordensServico = {
+                    json.result.ordensServico.push({
                         idOrdemServico: ordemServico.idOrdemServico,
                         total: ordemServico.total,
+                        dataOS: detalheOS.dataOS,
                         km: ordemServico.km,
                         cliente: cliente,
                         veiculo: veiculo,
-                    };
+                    });
                 }
             }
         }
@@ -205,6 +218,117 @@ module.exports = {
             });
         }
         json.result.vendaDireta = jsonVendas;
+        res.json(json);
+    },
+
+    buscaPorValor: async (req, res) => {
+        let json = { error: "", result: [] };
+        let valor = req.params.valor;
+
+        let pagamentos = await PagamentoService.buscarPorValor(valor).catch(
+            (error) => {
+                throw new AppError(error, 500);
+            }
+        );
+
+        if (!pagamentos) {
+            res.json(json);
+            return;
+        }
+        for (let i in pagamentos) {
+            // Cria uma variável para armazenar os dados de cada pagamento, para facilitar a inserção no json
+            let pagamento;
+
+            // Define os parâmetros de cada pagamento
+            pagamento = {
+                idPagamento: pagamentos[i].idPagamento,
+                subtotal: pagamentos[i].subtotal,
+                total: pagamentos[i].total,
+                formaPagamento: pagamentos[i].formaPagamento,
+                desconto: pagamentos[i].desconto,
+                dataHora: pagamentos[i].dataHora,
+                vendaDireta: [],
+                ordensServico: [],
+            };
+
+            // Busca no banco os dados referentes à tabela de DetalhePagamento referente a cada pagamento
+            let detalhePagamento =
+                await PagamentoService.buscarDetalhePagamento(
+                    pagamentos[i].idPagamento
+                ).catch((error) => {
+                    throw new AppError(error, 500);
+                });
+
+            if (detalhePagamento) {
+                // Cada pagamento pode ter 0 ou várias instâncias de DetalhePagamento, pois cada uma representa uma ordem de serviço diferente
+                for (let j in detalhePagamento) {
+                    // Como cada pagamento pode ter 0 ou várias ordens de serviço associadas, criamos uma variável para organizar os dados de cada OS
+                    let ordemServico = null;
+                    // Buscamos no banco de dados os valores referentes à ordem de serviço associada a cada pagamento
+                    ordemServico = await OrdemServicoService.buscarPorId(
+                        detalhePagamento[j].idOrdemServico
+                    ).catch((error) => {
+                        throw new AppError(error, 500);
+                    });
+                    if (ordemServico) {
+                        let detalheOS =
+                            await OrdemServicoService.buscarOSDetalhes(
+                                ordemServico.idOrdemServico
+                            ).catch((error) => {
+                                throw new AppError(error, 500);
+                            });
+                        // Buscamos no banco de dados os valores referentes ao cliente desta ordem de serviço especificada
+                        let cliente = await ClienteService.buscarPorId(
+                            ordemServico.idCliente
+                        );
+                        // Buscamos no banco de dados os valores referentes ao veículo desta ordem de serviço especificada
+                        let veiculo = await VeiculoService.buscaEspecificaPlaca(
+                            ordemServico.placaVeiculo
+                        );
+                        // Estou exibindo todos os dados de cliente e de veículo, porque caso um deles seja nulo,
+                        //  eu exibir apenas um atributo (como cliente.nomeCliente) vai quebrar o backend
+                        pagamento.ordensServico.push({
+                            idOrdemServico: ordemServico.idOrdemServico,
+                            total: ordemServico.total,
+                            dataOS: detalheOS.dataOS,
+                            km: ordemServico.km,
+                            cliente: cliente,
+                            veiculo: veiculo,
+                        });
+                    }
+                }
+            }
+            // Busca todas as vendas diretas que possuam aquele pagamento associado
+            let vendaDireta = await VendaDiretaService.buscarPorPagamento(
+                pagamentos[i].idPagamento
+            );
+            let vendas;
+
+            if (vendaDireta) {
+                vendas = await VendaDiretaService.buscarVendasPorVendaDireta(
+                    vendaDireta.idVendaDireta
+                );
+            }
+            let jsonVendas = [];
+            for (let i in vendas) {
+                let produto = await ProdutoService.buscaEspecificaCodigoBarras(
+                    vendas[i].codigoBarras
+                ).catch((error) => {
+                    throw new AppError(error, 500);
+                });
+                jsonVendas.push({
+                    codigoBarras: vendas[i].codigoBarras,
+                    descricao: produto.descricao,
+                    quantidadeVendida: vendas[i].quantidadeVendida,
+                    precoTotal: vendas[i].precoTotal,
+                    precoUnitario: vendas[i].precoUnitario,
+                });
+            }
+            pagamento.vendaDireta = jsonVendas;
+
+            // Adiciona o pagamento recem salvo em 'pagamento' no json.result
+            json.result.push(pagamento);
+        }
         res.json(json);
     },
 

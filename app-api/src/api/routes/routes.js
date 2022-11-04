@@ -78,7 +78,7 @@ router.get("/pagamento/:id", PagamentoController.buscarPorId); // Buscar pagamen
 router.post("/pagamento", PagamentoController.inserirPagamento); // Inserir novo pagamento no banco de dados
 // router.put("/cliente/:id", ClienteController.alterarCliente); // Alterar dados de um cliente
 router.delete("/pagamento/:id", PagamentoController.excluirPagamento); // Deletar um cliente do banco de dados
-// router.get("/clientes/:valor", ClienteController.buscaPorValor); // Buscar cliente por nome e/ou cpfCnpj
+router.get("/pagamentos/:valor", PagamentoController.buscaPorValor); // Buscar pagamento por id e se estiver nulo, retorna todos
 
 router.post("/relatorio/pagamentos", RelatorioController.buscarPagamentos);
 router.post("/relatorio/ordens-servico", RelatorioController.buscarOrdens);

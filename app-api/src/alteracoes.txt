@@ -31,3 +31,16 @@ a não ser que não seja o mesmo funcionário ou o mesmo serviço.
 
 ```
 
+Cliente.create({
+            nomeCliente: "Victor",
+            cpfCnpj: "43242453521",
+            celularCliente: "11957384759",
+            telefoneCliente: "40368576",
+            cep: "12970000",
+            endereco: "Rua San Remo",
+            numero: "44",
+            bairro: "Jd. San Marino",
+            cidade: "Piracaia",
+            uf: "SP",
+            complemento: "",
+        });

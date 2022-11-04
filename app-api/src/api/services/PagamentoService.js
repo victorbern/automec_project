@@ -36,6 +36,23 @@ module.exports = {
         });
     },
 
+    buscarPorValor: (valor) => {
+        valor = "%" + valor + "%";
+        return new Promise((aceito, rejeitado) => {
+            db.executeSQLQueryParams(
+                `SELECT idPagamento, dataHora, subtotal, total, desconto, formaPagamento FROM Pagamento WHERE idPagamento like ?`,
+                [valor],
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    aceito(results);
+                }
+            );
+        });
+    },
+
     inserirPagamento: (subtotal, total, formaPagamento, desconto) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
