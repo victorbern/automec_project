@@ -1,9 +1,13 @@
 const db = require("../../db");
 
-module.exports = {
-    buscarTodos: () => {
+class VendaDiretaServiceDAO {
+    constructor(connection) {
+        this._connection = connection;
+    }
+
+    buscarTodos() {
         return new Promise((aceito, rejeitado) => {
-            db.executeSQLQuery(
+            this._connection.query(
                 `SELECT idVendaDireta, idPagamento, total, dataHora FROM VendaDireta`,
                 (error, results) => {
                     if (error) {
@@ -14,11 +18,11 @@ module.exports = {
                 }
             );
         });
-    },
+    }
 
-    buscarPorId: (idVendaDireta) => {
+    buscarPorId(idVendaDireta) {
         return new Promise((aceito, rejeitado) => {
-            db.executeSQLQueryParams(
+            this._connection.query(
                 `SELECT idVendaDireta, idPagamento, total, dataHora FROM VendaDireta WHERE idVendaDireta = ?`,
                 [idVendaDireta],
                 (error, results) => {
@@ -34,11 +38,11 @@ module.exports = {
                 }
             );
         });
-    },
+    }
 
-    buscarPorPagamento: (idPagamento) => {
+    buscarPorPagamento(idPagamento) {
         return new Promise((aceito, rejeitado) => {
-            db.executeSQLQueryParams(
+            this._connection.query(
                 `SELECT idVendaDireta, total, dataHora FROM VendaDireta WHERE idPagamento = ?`,
                 [idPagamento],
                 (error, results) => {
@@ -50,11 +54,11 @@ module.exports = {
                 }
             );
         });
-    },
+    }
 
-    inserirVendaDireta: (idPagamento, total) => {
+    inserirVendaDireta(idPagamento, total) {
         return new Promise((aceito, rejeitado) => {
-            db.executeSQLQueryParams(
+            this._connection.query(
                 `INSERT INTO VendaDireta (idPagamento, total, dataHora) VALUES (?, ?, CURDATE())`,
                 [idPagamento, total],
                 (error, results) => {
@@ -66,11 +70,11 @@ module.exports = {
                 }
             );
         });
-    },
+    }
 
-    alterarVendaDireta: (idVendaDireta, total) => {
+    alterarVendaDireta(idVendaDireta, total) {
         return new Promise((aceito, rejeitado) => {
-            db.executeSQLQueryParams(
+            this._connection.query(
                 "UPDATE VendaDireta SET total = ? WHERE idVendaDireta = ?",
                 [total, idVendaDireta],
                 (error, results) => {
@@ -82,11 +86,11 @@ module.exports = {
                 }
             );
         });
-    },
+    }
 
-    excluirVendaDireta: (idVendaDireta) => {
+    excluirVendaDireta(idVendaDireta) {
         return new Promise((aceito, rejeitado) => {
-            db.executeSQLQueryParams(
+            this._connection.query(
                 `DELETE FROM VendaDireta WHERE idVendaDireta = ?`,
                 [idVendaDireta],
                 (error, results) => {
@@ -98,11 +102,11 @@ module.exports = {
                 }
             );
         });
-    },
+    }
 
-    buscarVendasPorVendaDireta: (idVendaDireta) => {
+    buscarVendasPorVendaDireta(idVendaDireta) {
         return new Promise((aceito, rejeitado) => {
-            db.executeSQLQueryParams(
+            this._connection.query(
                 `SELECT idVendaDireta, codigoBarras, quantidadeVendida, precoTotal, precoUnitario FROM Produto_has_VendaDireta WHERE idVendaDireta = ?`,
                 [idVendaDireta],
                 (error, results) => {
@@ -118,11 +122,11 @@ module.exports = {
                 }
             );
         });
-    },
+    }
 
-    buscarVendasPorProduto: (codigoBarras) => {
+    buscarVendasPorProduto(codigoBarras) {
         return new Promise((aceito, rejeitado) => {
-            db.executeSQLQueryParams(
+            this._connection.query(
                 `SELECT vd.idVendaDireta, vd.idPagamento, vd.total, vd.dataHora FROM VendaDireta AS vd INNER JOIN Produto_has_VendaDireta AS p_vd ON vd.idVendaDireta = p_vd.idVendaDireta WHERE p_vd.codigoBarras = ?`,
                 [codigoBarras],
                 (error, results) => {
@@ -138,11 +142,11 @@ module.exports = {
                 }
             );
         });
-    },
+    }
 
-    buscarVendaEspecifica: (idVendaDireta, codigoBarras) => {
+    buscarVendaEspecifica(idVendaDireta, codigoBarras) {
         return new Promise((aceito, rejeitado) => {
-            db.executeSQLQueryParams(
+            this._connection.query(
                 `SELECT idVendaDireta, codigoBarras, quantidadeVendida, precoTotal, precoUnitario FROM Produto_has_VendaDireta WHERE idVendaDireta = ? && codigoBarras = ?`,
                 [idVendaDireta, codigoBarras],
                 (error, results) => {
@@ -158,17 +162,17 @@ module.exports = {
                 }
             );
         });
-    },
+    }
 
-    inserirProduto_has_VendaDireta: (
+    inserirProduto_has_VendaDireta(
         idVendaDireta,
         codigoBarras,
         quantidadeVendida,
         precoTotal,
         precoUnitario
-    ) => {
+    ) {
         return new Promise((aceito, rejeitado) => {
-            db.executeSQLQueryParams(
+            this._connection.query(
                 `INSERT INTO Produto_has_VendaDireta (idVendaDireta, codigoBarras, quantidadeVendida, precoTotal, precoUnitario) VALUES (?, ?, ?, ?, ?)`,
                 [
                     idVendaDireta,
@@ -186,17 +190,17 @@ module.exports = {
                 }
             );
         });
-    },
+    }
 
-    alterarProduto_has_VendaDireta: (
+    alterarProduto_has_VendaDireta(
         idVendaDireta,
         codigoBarras,
         quantidadeVendida,
         precoTotal,
         precoUnitario
-    ) => {
+    ) {
         return new Promise((aceito, rejeitado) => {
-            db.executeSQLQueryParams(
+            this._connection.query(
                 `UPDATE Produto_has_VendaDireta SET quantidadeVendida = ?, precoTotal = ?, precoUnitario = ? WHERE idVendaDireta = ? && codigoBarras = ?`,
                 [
                     quantidadeVendida,
@@ -214,10 +218,10 @@ module.exports = {
                 }
             );
         });
-    },
-    excluirProdutoVendaDireta: (idVendaDireta, codigoBarras) => {
+    }
+    excluirProdutoVendaDireta(idVendaDireta, codigoBarras) {
         return new Promise((aceito, rejeitado) => {
-            db.executeSQLQueryParams(
+            this._connection.query(
                 `DELETE FROM Produto_has_VendaDireta WHERE idVendaDireta = ? && codigoBarras = ?`,
                 [idVendaDireta, codigoBarras],
                 (error, results) => {
@@ -229,8 +233,10 @@ module.exports = {
                 }
             );
         });
-    },
-};
+    }
+}
+
+module.exports = VendaDiretaServiceDAO;
 
 // Alterações feitas no dia 27/08/2022
 // Adição de método remover (que apenas altera o valor isAtivo no banco de dados)

@@ -1,13 +1,16 @@
 const { json } = require("body-parser");
 const AppError = require("../errors/AppError");
 const VeiculoService = require("../services/VeiculoService");
+const VeiculoServiceDAO = require("../services/VeiculoServiceDAO");
 
 module.exports = {
     buscarTodos: async (req, res) => {
         let json = { error: "", result: [] };
-        let veiculos = await VeiculoService.buscarTodos().catch((error) => {
-            throw new AppError(error, 500);
-        });
+        let veiculos = await new VeiculoServiceDAO(req.connection)
+            .buscarTodos()
+            .catch((error) => {
+                throw new AppError(error, 500);
+            });
 
         for (let i in veiculos) {
             json.result.push({
@@ -29,11 +32,11 @@ module.exports = {
     buscarPorPlaca: async (req, res) => {
         let json = { error: "", result: [] };
         let placa = req.params.placa;
-        let veiculo = await VeiculoService.buscaEspecificaPlaca(placa).catch(
-            (error) => {
+        let veiculo = await new VeiculoServiceDAO(req.connection)
+            .buscaEspecificaPlaca(placa)
+            .catch((error) => {
                 throw new AppError(error, 500);
-            }
-        );
+            });
         json.result.push({
             placaVeiculo: veiculo.placaVeiculo,
             marca: veiculo.marca,
@@ -52,11 +55,11 @@ module.exports = {
     buscaPorValor: async (req, res) => {
         let json = { error: "", result: [] };
         let valor = req.params.valor;
-        let veiculos = await VeiculoService.buscaPorValor(valor).catch(
-            (error) => {
+        let veiculos = await new VeiculoServiceDAO(req.connection)
+            .buscaPorValor(valor)
+            .catch((error) => {
                 throw new AppError(error, 500);
-            }
-        );
+            });
 
         for (let i in veiculos) {
             json.result.push({
@@ -87,17 +90,19 @@ module.exports = {
         let veiculo_idCliente = req.body.veiculo_idCliente;
 
         if (placaVeiculo && marca && modelo && veiculo_idCliente) {
-            await VeiculoService.inserirVeiculo(
-                placaVeiculo,
-                marca,
-                modelo,
-                ano,
-                capacidadeOleo,
-                cor,
-                veiculo_idCliente
-            ).catch((error) => {
-                throw new AppError(error, 500);
-            });
+            await new VeiculoServiceDAO(req.connection)
+                .inserirVeiculo(
+                    placaVeiculo,
+                    marca,
+                    modelo,
+                    ano,
+                    capacidadeOleo,
+                    cor,
+                    veiculo_idCliente
+                )
+                .catch((error) => {
+                    throw new AppError(error, 500);
+                });
             json.result = {
                 placaVeiculo,
                 marca,
@@ -126,17 +131,19 @@ module.exports = {
         let veiculo_idCliente = req.body.veiculo_idCliente;
 
         if (placaVeiculo && marca && modelo && veiculo_idCliente) {
-            await VeiculoService.alterarVeiculo(
-                placaVeiculo,
-                marca,
-                modelo,
-                ano,
-                capacidadeOleo,
-                cor,
-                veiculo_idCliente
-            ).catch((error) => {
-                throw new AppError(error, 500);
-            });
+            await new VeiculoServiceDAO(req.connection)
+                .alterarVeiculo(
+                    placaVeiculo,
+                    marca,
+                    modelo,
+                    ano,
+                    capacidadeOleo,
+                    cor,
+                    veiculo_idCliente
+                )
+                .catch((error) => {
+                    throw new AppError(error, 500);
+                });
             json.result = {
                 placaVeiculo,
                 marca,
@@ -155,11 +162,11 @@ module.exports = {
     buscarPorCliente: async (req, res) => {
         let json = { error: "", result: [] };
         let veiculo_idCliente = req.params.idCliente;
-        let veiculos = await VeiculoService.buscarPorCliente(
-            veiculo_idCliente
-        ).catch((error) => {
-            throw new AppError(error, 500);
-        });
+        let veiculos = await new VeiculoServiceDAO(req.connection)
+            .buscarPorCliente(veiculo_idCliente)
+            .catch((error) => {
+                throw new AppError(error, 500);
+            });
 
         for (let i in veiculos) {
             json.result.push({
@@ -184,9 +191,11 @@ module.exports = {
         let placaVeiculo = req.params.placa;
 
         if (placaVeiculo) {
-            await VeiculoService.excluirVeiculo(placaVeiculo).catch((error) => {
-                throw new AppError(error, 500);
-            });
+            await new VeiculoServiceDAO(req.connection)
+                .excluirVeiculo(placaVeiculo)
+                .catch((error) => {
+                    throw new AppError(error, 500);
+                });
             json.result = {
                 placaVeiculo: placaVeiculo,
             };

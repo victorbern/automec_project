@@ -1,0 +1,5 @@
+node_modules
+node-debug.log
+Dockerfile
+docker-compose.yaml
+.dockerignore

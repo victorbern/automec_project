@@ -1,35 +1,34 @@
 const { json } = require("body-parser");
-const ProdutoService = require("../services/ProdutoService");
-const VendaDiretaService = require("../services/VendaDiretaService");
 const qs = require("qs");
 const AppError = require("../errors/AppError");
+const VendaDiretaServiceDAO = require("../services/VendaDiretaServiceDAO");
+const ProdutoServiceDAO = require("../services/ProdutoServiceDAO");
 
 module.exports = {
     buscarTodos: async (req, res) => {
         let json = { error: "", result: [] };
 
-        let vendaDireta = await VendaDiretaService.buscarTodos().catch(
-            (error) => {
+        let vendaDireta = await new VendaDiretaServiceDAO(req.connection)
+            .buscarTodos()
+            .catch((error) => {
                 throw new AppError(error, 500);
-            }
-        );
+            });
         if (!vendaDireta) {
             json.result[0] = "Não foram encontradas nenhuma venda direta";
         }
 
         for (let i in vendaDireta) {
-            let vendas = await VendaDiretaService.buscarVendasPorVendaDireta(
-                vendaDireta[i].idVendaDireta
-            ).catch((error) => {
-                throw new AppError(error, 500);
-            });
+            let vendas = await new VendaDiretaServiceDAO(req.connection)
+                .buscarVendasPorVendaDireta(vendaDireta[i].idVendaDireta)
+                .catch((error) => {
+                    throw new AppError(error, 500);
+                });
             let jsonVendas = [];
             if (vendas) {
                 for (let j in vendas) {
-                    let produto =
-                        await ProdutoService.buscaEspecificaCodigoBarras(
-                            vendas[j].codigoBarras
-                        ).catch((error) => {
+                    let produto = await new ProdutoServiceDAO(req.connection)
+                        .buscaEspecificaCodigoBarras(vendas[j].codigoBarras)
+                        .catch((error) => {
                             throw new AppError(error, 500);
                         });
                     jsonVendas.push({
@@ -56,27 +55,27 @@ module.exports = {
     buscarPorId: async (req, res) => {
         let json = { error: "", result: {} };
         let idVendaDireta = req.params.id;
-        let vendaDireta = await VendaDiretaService.buscarPorId(
-            idVendaDireta
-        ).catch((error) => {
-            throw new AppError(error, 500);
-        });
+        let vendaDireta = await new VendaDiretaServiceDAO(req.connection)
+            .buscarPorId(idVendaDireta)
+            .catch((error) => {
+                throw new AppError(error, 500);
+            });
         if (!vendaDireta) {
             json.result = "Não foi encontrada nenhuma venda direta com este id";
         }
-        let vendas = await VendaDiretaService.buscarVendasPorVendaDireta(
-            idVendaDireta
-        ).catch((error) => {
-            throw new AppError(error, 500);
-        });
+        let vendas = await new VendaDiretaServiceDAO(req.connection)
+            .buscarVendasPorVendaDireta(idVendaDireta)
+            .catch((error) => {
+                throw new AppError(error, 500);
+            });
         let jsonVendas = [];
         if (vendas) {
             for (let i in vendas) {
-                let produto = await ProdutoService.buscaEspecificaCodigoBarras(
-                    vendas[i].codigoBarras
-                ).catch((error) => {
-                    throw new AppError(error, 500);
-                });
+                let produto = await new ProdutoServiceDAO(req.connection)
+                    .buscaEspecificaCodigoBarras(vendas[i].codigoBarras)
+                    .catch((error) => {
+                        throw new AppError(error, 500);
+                    });
                 jsonVendas.push({
                     codigoBarras: vendas[i].codigoBarras,
                     descricao: produto.descricao,
@@ -101,26 +100,29 @@ module.exports = {
         let valor = req.params.valor;
 
         // Busca a venda direta que possui o id especificado
-        let vendaDireta_buscada = await VendaDiretaService.buscarPorId(
-            valor
-        ).catch((error) => {
-            throw new AppError(error, 500);
-        });
+        let vendaDireta_buscada = await new VendaDiretaServiceDAO(
+            req.connection
+        )
+            .buscarPorId(valor)
+            .catch((error) => {
+                throw new AppError(error, 500);
+            });
         let vendaDireta = [];
         if (vendaDireta_buscada) {
             vendaDireta.push({ vendaDireta_buscada });
         }
-        let produtos = await ProdutoService.buscaPorValor(valor).catch(
-            (error) => {
+        let produtos = await new ProdutoServiceDAO(req.connection)
+            .buscaPorValor(valor)
+            .catch((error) => {
                 throw new AppError(error, 500);
-            }
-        );
+            });
 
         for (let i in produtos) {
-            let vendasDiretas_buscadas =
-                await VendaDiretaService.buscarVendasPorProduto(
-                    produtos[i].codigoBarras
-                ).catch((error) => {
+            let vendasDiretas_buscadas = await new VendaDiretaServiceDAO(
+                req.connection
+            )
+                .buscarVendasPorProduto(produtos[i].codigoBarras)
+                .catch((error) => {
                     throw new AppError(error, 500);
                 });
             // Comando para remover o RowDataPacket
@@ -150,18 +152,17 @@ module.exports = {
             return;
         }
         for (let i in vendaDireta) {
-            let vendas = await VendaDiretaService.buscarVendasPorVendaDireta(
-                vendaDireta[i].idVendaDireta
-            ).catch((error) => {
-                throw new AppError(error, 500);
-            });
+            let vendas = await new VendaDiretaServiceDAO(req.connection)
+                .buscarVendasPorVendaDireta(vendaDireta[i].idVendaDireta)
+                .catch((error) => {
+                    throw new AppError(error, 500);
+                });
             let jsonVendas = [];
             if (vendas) {
                 for (let j in vendas) {
-                    let produto =
-                        await ProdutoService.buscaEspecificaCodigoBarras(
-                            vendas[j].codigoBarras
-                        ).catch((error) => {
+                    let produto = await new ProdutoServiceDAO(req.connection)
+                        .buscaEspecificaCodigoBarras(vendas[j].codigoBarras)
+                        .catch((error) => {
                             throw new AppError(error, 500);
                         });
                     jsonVendas.push({
@@ -192,26 +193,27 @@ module.exports = {
         let total = valores.total;
 
         if (idPagamento && total) {
-            let IdVendaDireta = await VendaDiretaService.inserirVendaDireta(
-                idPagamento,
-                total
-            ).catch((error) => {
-                throw new AppError(error, 500);
-            });
+            let IdVendaDireta = await new VendaDiretaServiceDAO(req.connection)
+                .inserirVendaDireta(idPagamento, total)
+                .catch((error) => {
+                    throw new AppError(error, 500);
+                });
             if (valores.produtos) {
                 for (let i in valores.produtos) {
                     let codigoBarras = valores.produtos[i].codigoBarras;
                     let quantidadeVendida =
                         valores.produtos[i].quantidadeVendida * 1;
                     let precoTotal = valores.produtos[i].precoTotal * 1;
-                    await VendaDiretaService.inserirProduto_has_VendaDireta(
-                        IdVendaDireta,
-                        codigoBarras,
-                        quantidadeVendida,
-                        precoTotal
-                    ).catch((error) => {
-                        throw new AppError(error, 500);
-                    });
+                    await new VendaDiretaServiceDAO(req.connection)
+                        .inserirProduto_has_VendaDireta(
+                            IdVendaDireta,
+                            codigoBarras,
+                            quantidadeVendida,
+                            precoTotal
+                        )
+                        .catch((error) => {
+                            throw new AppError(error, 500);
+                        });
                 }
             }
             json.result = "Dados enviados";
@@ -232,17 +234,16 @@ module.exports = {
         let total = valores.total;
 
         if (idVendaDireta && total) {
-            await VendaDiretaService.alterarVendaDireta(
-                idVendaDireta,
-                total
-            ).catch((error) => {
-                throw new AppError(error, 500);
-            });
-            let vendas = await VendaDiretaService.buscarVendasPorVendaDireta(
-                idVendaDireta
-            ).catch((error) => {
-                throw new AppError(error, 500);
-            });
+            await new VendaDiretaServiceDAO(req.connection)
+                .alterarVendaDireta(idVendaDireta, total)
+                .catch((error) => {
+                    throw new AppError(error, 500);
+                });
+            let vendas = await new VendaDiretaServiceDAO(req.connection)
+                .buscarVendasPorVendaDireta(idVendaDireta)
+                .catch((error) => {
+                    throw new AppError(error, 500);
+                });
             let vendasCadastradas = [];
             if (vendas) {
                 for (let i in vendas) {
@@ -269,21 +270,27 @@ module.exports = {
                         }
                     }
                     if (!produtoExiste) {
-                        await VendaDiretaService.excluirProdutoVendaDireta(
-                            idVendaDireta,
-                            vendasCadastradas[i].codigoBarras
-                        ).catch((error) => {
-                            throw new AppError(error, 500);
-                        });
+                        await new VendaDiretaServiceDAO(req.connection)
+                            .excluirProdutoVendaDireta(
+                                idVendaDireta,
+                                vendasCadastradas[i].codigoBarras
+                            )
+                            .catch((error) => {
+                                throw new AppError(error, 500);
+                            });
                     }
                 }
                 for (let i in valores.produtos) {
-                    let venda = await VendaDiretaService.buscarVendaEspecifica(
+                    let venda = await new VendaDiretaServiceDAO(
+                        req.connection
+                    ).buscarVendaEspecifica(
                         idVendaDireta,
                         valores.produtos[i].codigoBarras
                     );
                     if (!venda) {
-                        await VendaDiretaService.inserirProduto_has_VendaDireta(
+                        await new VendaDiretaServiceDAO(
+                            req.connection
+                        ).inserirProduto_has_VendaDireta(
                             idVendaDireta,
                             valores.produtos[i].codigoBarras,
                             valores.produtos[i].quantidadeVendida,
@@ -297,7 +304,9 @@ module.exports = {
                         venda.precoTotal != valores.produtos[i].precoTotal ||
                         venda.precoUnitario != valores.produtos[i].precoUnitario
                     ) {
-                        await VendaDiretaService.alterarProduto_has_VendaDireta(
+                        await new VendaDiretaServiceDAO(
+                            req.connection
+                        ).alterarProduto_has_VendaDireta(
                             idVendaDireta,
                             valores.produtos[i].codigoBarras,
                             valores.produtos[i].quantidadeVendida,
@@ -320,26 +329,28 @@ module.exports = {
 
         let idVendaDireta = req.params.id;
         if (idVendaDireta) {
-            let vendas = await VendaDiretaService.buscarVendasPorVendaDireta(
-                idVendaDireta
-            ).catch((error) => {
-                throw new AppError(error, 500);
-            });
-            for (let i in vendas) {
-                await VendaDiretaService.excluirProdutoVendaDireta(
-                    vendas[i].idVendaDireta,
-                    vendas[i].codigoBarras
-                ).catch((error) => {
+            let vendas = await new VendaDiretaServiceDAO(req.connection)
+                .buscarVendasPorVendaDireta(idVendaDireta)
+                .catch((error) => {
                     throw new AppError(error, 500);
-                    res.json(json);
-                    return;
                 });
+            for (let i in vendas) {
+                await new VendaDiretaServiceDAO(req.connection)
+                    .excluirProdutoVendaDireta(
+                        vendas[i].idVendaDireta,
+                        vendas[i].codigoBarras
+                    )
+                    .catch((error) => {
+                        throw new AppError(error, 500);
+                        res.json(json);
+                        return;
+                    });
             }
-            await VendaDiretaService.excluirVendaDireta(idVendaDireta).catch(
-                (error) => {
+            await new VendaDiretaServiceDAO(req.connection)
+                .excluirVendaDireta(idVendaDireta)
+                .catch((error) => {
                     throw new AppError(error, 500);
-                }
-            );
+                });
             json.result = "Dados excluidos com sucesso!";
         } else {
             throw new AppError("Campos não enviados", 400);

@@ -1,13 +1,15 @@
 const { json } = require("body-parser");
 const AppError = require("../errors/AppError");
-const ProdutoService = require("../services/ProdutoService");
+const ProdutoServiceDAO = require("../services/ProdutoServiceDAO");
 
 module.exports = {
     buscarTodos: async (req, res) => {
         let json = { error: "", result: [] };
-        let produtos = await ProdutoService.buscarTodos().catch((error) => {
-            throw new AppError(error, 500);
-        });
+        let produtos = await new ProdutoServiceDAO(req.connection)
+            .buscarTodos()
+            .catch((error) => {
+                throw new AppError(error, 500);
+            });
 
         for (let i in produtos) {
             json.result.push({
@@ -25,11 +27,11 @@ module.exports = {
     buscarPorCodigoBarras: async (req, res) => {
         let json = { error: "", result: {} };
         let codigoBarras = req.params.codigoBarras;
-        let produto = await ProdutoService.buscaEspecificaCodigoBarras(
-            codigoBarras
-        ).catch((error) => {
-            throw new AppError(error, 500);
-        });
+        let produto = await new ProdutoServiceDAO(req.connection)
+            .buscaEspecificaCodigoBarras(codigoBarras)
+            .catch((error) => {
+                throw new AppError(error, 500);
+            });
 
         if (produto) {
             json.result = produto;
@@ -41,11 +43,11 @@ module.exports = {
     buscaPorValor: async (req, res) => {
         let json = { error: "", result: [] };
         let valor = req.params.valor;
-        let produtos = await ProdutoService.buscaPorValor(valor).catch(
-            (error) => {
+        let produtos = await new ProdutoServiceDAO(req.connection)
+            .buscaPorValor(valor)
+            .catch((error) => {
                 throw new AppError(error, 500);
-            }
-        );
+            });
 
         for (let i in produtos) {
             json.result.push({
@@ -73,15 +75,17 @@ module.exports = {
             if (!quantidadeEstoque) {
                 quantidadeEstoque = 0;
             }
-            await ProdutoService.inserirProduto(
-                codigoBarras,
-                descricao,
-                valorCusto,
-                quantidadeEstoque,
-                precoVenda
-            ).catch((error) => {
-                throw new AppError(error, 500);
-            });
+            await new ProdutoServiceDAO(req.connection)
+                .inserirProduto(
+                    codigoBarras,
+                    descricao,
+                    valorCusto,
+                    quantidadeEstoque,
+                    precoVenda
+                )
+                .catch((error) => {
+                    throw new AppError(error, 500);
+                });
             json.result = {
                 codigoBarras,
                 descricao,
@@ -102,12 +106,11 @@ module.exports = {
         let codigoBarras = req.params.codigoBarras;
         let valorAlteracao = req.body.valorAlteracao;
         if (valorAlteracao) {
-            await ProdutoService.alterarEstoque(
-                codigoBarras,
-                valorAlteracao
-            ).catch((error) => {
-                throw new AppError(error, 500);
-            });
+            await new ProdutoServiceDAO(req.connection)
+                .alterarEstoque(codigoBarras, valorAlteracao)
+                .catch((error) => {
+                    throw new AppError(error, 500);
+                });
         } else {
             throw new AppError("O valor não pode ser nulo", 400);
         }
@@ -124,14 +127,11 @@ module.exports = {
         let precoVenda = req.body.precoVenda;
 
         if (codigoBarras && descricao && valorCusto && precoVenda) {
-            await ProdutoService.alterarProduto(
-                codigoBarras,
-                descricao,
-                valorCusto,
-                precoVenda
-            ).catch((error) => {
-                throw new AppError(error, 500);
-            });
+            await new ProdutoServiceDAO(req.connection)
+                .alterarProduto(codigoBarras, descricao, valorCusto, precoVenda)
+                .catch((error) => {
+                    throw new AppError(error, 500);
+                });
             json.result = {
                 codigoBarras,
                 descricao,
@@ -151,9 +151,11 @@ module.exports = {
         let codigoBarras = req.params.codigoBarras;
 
         if (codigoBarras) {
-            await ProdutoService.excluirProduto(codigoBarras).catch((error) => {
-                throw new AppError(error, 500);
-            });
+            await new ProdutoServiceDAO(req.connection)
+                .excluirProduto(codigoBarras)
+                .catch((error) => {
+                    throw new AppError(error, 500);
+                });
             json.result = "Produto excluido com sucesso!";
         } else {
             throw new AppError("Campos não enviados", 400);

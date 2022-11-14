@@ -1,12 +1,12 @@
 const { json } = require("body-parser");
-const ClienteService = require("../services/ClienteService");
-const OrdemServicoService = require("../services/OrdemServicoService");
+const ClienteServiceDAO = require("../services/ClienteServiceDAO");
 const qs = require("qs");
-const ProdutoService = require("../services/ProdutoService");
-const VeiculoService = require("../services/VeiculoService");
-const FuncionarioService = require("../services/FuncionarioService");
-const ServicoService = require("../services/ServicoService");
 const AppError = require("../errors/AppError");
+const OrdemServicoServiceDAO = require("../services/OrdemServicoServiceDAO");
+const ProdutoServiceDAO = require("../services/ProdutoServiceDAO");
+const FuncionarioServiceDAO = require("../services/FuncionarioServiceDAO");
+const ServicoServiceDAO = require("../services/ServicoServiceDAO");
+const VeiculoServiceDAO = require("../services/VeiculoServiceDAO");
 
 module.exports = {
     // Busca todas as ordens de serviço no banco de dados
@@ -15,9 +15,11 @@ module.exports = {
         let json = { error: "", result: [] };
 
         // Busca todas as ordens de serviços cadastradas no banco de dados
-        let ordens = await OrdemServicoService.buscarTodos().catch((error) => {
-            throw new AppError(error, 500);
-        });
+        let ordens = await new OrdemServicoServiceDAO(req.connection)
+            .buscarTodos()
+            .catch((error) => {
+                throw new AppError(error, 500);
+            });
 
         // Se existir alguma ordem de serviço cadastrada, entra no if. Senão, devolve um json vazio.
         if (!ordens) {
@@ -26,44 +28,42 @@ module.exports = {
         // Percorre cada ordm de serviço cadastrada no banco
         for (let i in ordens) {
             // Para cada ordem de serviço cadastrada, busca todos os dados do cliente e salva na variável 'cliente'
-            let cliente = await ClienteService.buscarPorId(
-                ordens[i].idCliente
-            ).catch((error) => {
-                throw new AppError(error, 500);
-            });
+            let cliente = await new ClienteServiceDAO(req.connection)
+                .buscarPorId(ordens[i].idCliente)
+                .catch((error) => {
+                    throw new AppError(error, 500);
+                });
             // Para cada ordem de serviço cadastrada, busca todos os dados do veiculo e salva na variável 'veiculo'
-            let veiculo = await VeiculoService.buscaEspecificaPlaca(
-                ordens[i].placaVeiculo
-            ).catch((error) => {
-                throw new AppError(error, 500);
-            });
+            let veiculo = await new VeiculoServiceDAO(req.connection)
+                .buscaEspecificaPlaca(ordens[i].placaVeiculo)
+                .catch((error) => {
+                    throw new AppError(error, 500);
+                });
             // Busca os dados da tabela OSDetalhes para cada ordem de serviço
-            let osDetalhes = await OrdemServicoService.buscarOSDetalhes(
-                ordens[i].idOrdemServico
-            ).catch((error) => {
-                throw new AppError(error, 500);
-            });
+            let osDetalhes = await new OrdemServicoServiceDAO(req.connection)
+                .buscarOSDetalhes(ordens[i].idOrdemServico)
+                .catch((error) => {
+                    throw new AppError(error, 500);
+                });
             let vendas, executaFuncao;
             if (osDetalhes) {
                 // Busca de todas as instancias de Produto_has_OSDetalhes salvas no banco, ou seja, todas as vendas de produtos desta ordem de serviço e salva em 'vendas'
-                vendas = await OrdemServicoService.buscarVendaPorOSDetalhes(
-                    osDetalhes.idOSDetalhes
-                );
+                vendas = await new OrdemServicoServiceDAO(
+                    req.connection
+                ).buscarVendaPorOSDetalhes(osDetalhes.idOSDetalhes);
                 // Busca de todas as instancias de ExecutaFuncao salvas no banco, ou seja, todos os serviços executados desta ordem de servico e salva em 'executaFuncao'
-                executaFuncao =
-                    await OrdemServicoService.buscarExecutaFuncaoGeral(
-                        osDetalhes.idOSDetalhes
-                    );
+                executaFuncao = await new OrdemServicoServiceDAO(
+                    req.connection
+                ).buscarExecutaFuncaoGeral(osDetalhes.idOSDetalhes);
             }
             // instancia uma variavel para armazenar os dados de cada produto em um json
             let produtos = [];
             if (vendas) {
                 for (let i in vendas) {
                     // Para cada venda cadastrada, busca todos os dados de produto e salva na variável 'produto'
-                    let produto =
-                        await ProdutoService.buscaEspecificaCodigoBarras(
-                            vendas[i].codigoBarras
-                        );
+                    let produto = await new ProdutoServiceDAO(
+                        req.connection
+                    ).buscaEspecificaCodigoBarras(vendas[i].codigoBarras);
                     produtos.push({
                         codigoBarras: produto.codigoBarras,
                         descricao: produto.descricao,
@@ -79,13 +79,13 @@ module.exports = {
             if (executaFuncao) {
                 for (let i in executaFuncao) {
                     // Para cada execução de servico cadastrada, busca todos os dados de servico e salva na variável 'servico'
-                    let servico = await ServicoService.buscarPorId(
-                        executaFuncao[i].idServico
-                    );
+                    let servico = await new ServicoServiceDAO(
+                        req.connection
+                    ).buscarPorId(executaFuncao[i].idServico);
                     // Para cada execução de servico cadastrada, busca todos os dados de funcionário e salva na variável 'funcionário'
-                    let funcionario = await FuncionarioService.buscarPorId(
-                        executaFuncao[i].idFuncionario
-                    );
+                    let funcionario = await new FuncionarioServiceDAO(
+                        req.connection
+                    ).buscarPorId(executaFuncao[i].idFuncionario);
                     servicos.push({
                         idServico: executaFuncao[i].idServico,
                         descricaoServico: servico.descricaoServico,
@@ -124,7 +124,9 @@ module.exports = {
             throw new AppError("Campo id faltante", 400);
         }
         // Busca a ordem de serviço que possui aquele id e salva na variável 'ordem'
-        let ordem = await OrdemServicoService.buscarPorId(idOrdemServico);
+        let ordem = await new OrdemServicoServiceDAO(
+            req.connection
+        ).buscarPorId(idOrdemServico);
 
         if (!ordem) {
             json.result.push(
@@ -134,30 +136,32 @@ module.exports = {
             return;
         }
         // Busca todos os dados do cliente desta ordem
-        let cliente = await ClienteService.buscarPorId(ordem.idCliente);
+        let cliente = await new ClienteServiceDAO(req.connection).buscarPorId(
+            ordem.idCliente
+        );
 
         // Busca todos os dados do veiculo desta ordem
-        let veiculo = await VeiculoService.buscaEspecificaPlaca(
-            ordem.placaVeiculo
-        );
-        let osDetalhes = await OrdemServicoService.buscarOSDetalhes(
-            ordem.idOrdemServico
-        );
+        let veiculo = await new VeiculoServiceDAO(
+            req.connection
+        ).buscaEspecificaPlaca(ordem.placaVeiculo);
+        let osDetalhes = await new OrdemServicoServiceDAO(
+            req.connection
+        ).buscarOSDetalhes(ordem.idOrdemServico);
         let vendas, executaFuncao;
         if (osDetalhes) {
-            vendas = await OrdemServicoService.buscarVendaPorOSDetalhes(
-                osDetalhes.idOSDetalhes
-            );
-            executaFuncao = await OrdemServicoService.buscarExecutaFuncaoGeral(
-                osDetalhes.idOSDetalhes
-            );
+            vendas = await new OrdemServicoServiceDAO(
+                req.connection
+            ).buscarVendaPorOSDetalhes(osDetalhes.idOSDetalhes);
+            executaFuncao = await new OrdemServicoServiceDAO(
+                req.connection
+            ).buscarExecutaFuncaoGeral(osDetalhes.idOSDetalhes);
         }
         let produtos = [];
         if (vendas) {
             for (let i in vendas) {
-                let produto = await ProdutoService.buscaEspecificaCodigoBarras(
-                    vendas[i].codigoBarras
-                );
+                let produto = await new ProdutoServiceDAO(
+                    req.connection
+                ).buscaEspecificaCodigoBarras(vendas[i].codigoBarras);
                 produtos.push({
                     codigoBarras: produto.codigoBarras,
                     descricao: produto.descricao,
@@ -171,12 +175,12 @@ module.exports = {
         let servicos = [];
         if (executaFuncao) {
             for (let i in executaFuncao) {
-                let servico = await ServicoService.buscarPorId(
-                    executaFuncao[i].idServico
-                );
-                let funcionario = await FuncionarioService.buscarPorId(
-                    executaFuncao[i].idFuncionario
-                );
+                let servico = await new ServicoServiceDAO(
+                    req.connection
+                ).buscarPorId(executaFuncao[i].idServico);
+                let funcionario = await new FuncionarioServiceDAO(
+                    req.connection
+                ).buscarPorId(executaFuncao[i].idFuncionario);
                 servicos.push({
                     idServico: executaFuncao[i].idServico,
                     descricaoServico: servico.descricaoServico,
@@ -209,21 +213,31 @@ module.exports = {
         let json = { error: "", result: [] };
         let valor = req.params.valor;
 
-        let clientes = await ClienteService.buscarPorNomeCliente(valor);
-        let veiculos = await VeiculoService.buscaPorValor(valor);
+        let clientes = await new ClienteServiceDAO(
+            req.connection
+        ).buscarPorNomeCliente(valor);
+        let veiculos = await new VeiculoServiceDAO(
+            req.connection
+        ).buscaPorValor(valor);
         let ordens = [];
 
         // Adicionar verificação para ver se valor é numérico
-        ordem = await OrdemServicoService.buscarPorId(valor);
+        ordem = await new OrdemServicoServiceDAO(req.connection).buscarPorId(
+            valor
+        );
         if (ordem) {
-            if (!(await OrdemServicoService.isPaga(ordem.idOrdemServico))) {
+            if (
+                !(await new OrdemServicoServiceDAO(req.connection).isPaga(
+                    ordem.idOrdemServico
+                ))
+            ) {
                 ordens.push(ordem);
             }
         }
         for (let i in clientes) {
-            ordem = await OrdemServicoService.buscaPorIdCliente(
-                clientes[i].idCliente
-            );
+            ordem = await new OrdemServicoServiceDAO(
+                req.connection
+            ).buscaPorIdCliente(clientes[i].idCliente);
             if (ordem) {
                 for (let j in ordem) {
                     ordens.push(ordem[j]);
@@ -231,9 +245,9 @@ module.exports = {
             }
         }
         for (let i in veiculos) {
-            ordem = await OrdemServicoService.buscaPorPlacaVeiculo(
-                veiculos[i].placaVeiculo
-            );
+            ordem = await new OrdemServicoServiceDAO(
+                req.connection
+            ).buscaPorPlacaVeiculo(veiculos[i].placaVeiculo);
             if (ordem) {
                 // A função de buscaPorPlacaVeiculo busca vários veículos e não um só
                 for (let j in ordem) {
@@ -247,31 +261,31 @@ module.exports = {
             return !this[JSON.stringify(a)] && (this[JSON.stringify(a)] = true);
         }, Object.create(null));
         for (let i in ordens) {
-            let cliente = await ClienteService.buscarPorId(ordens[i].idCliente);
-            let veiculo = await VeiculoService.buscaEspecificaPlaca(
-                ordens[i].placaVeiculo
-            );
-            let osDetalhes = await OrdemServicoService.buscarOSDetalhes(
-                ordens[i].idOrdemServico
-            );
+            let cliente = await new ClienteServiceDAO(
+                req.connection
+            ).buscarPorId(ordens[i].idCliente);
+            let veiculo = await new VeiculoServiceDAO(
+                req.connection
+            ).buscaEspecificaPlaca(ordens[i].placaVeiculo);
+            let osDetalhes = await new OrdemServicoServiceDAO(
+                req.connection
+            ).buscarOSDetalhes(ordens[i].idOrdemServico);
             let vendas, executaFuncao;
             if (osDetalhes) {
-                vendas = await OrdemServicoService.buscarVendaPorOSDetalhes(
-                    osDetalhes.idOSDetalhes
-                );
-                executaFuncao =
-                    await OrdemServicoService.buscarExecutaFuncaoGeral(
-                        osDetalhes.idOSDetalhes
-                    );
+                vendas = await new OrdemServicoServiceDAO(
+                    req.connection
+                ).buscarVendaPorOSDetalhes(osDetalhes.idOSDetalhes);
+                executaFuncao = await new OrdemServicoServiceDAO(
+                    req.connection
+                ).buscarExecutaFuncaoGeral(osDetalhes.idOSDetalhes);
             }
 
             let produtos = [];
             if (vendas) {
                 for (let i in vendas) {
-                    let produto =
-                        await ProdutoService.buscaEspecificaCodigoBarras(
-                            vendas[i].codigoBarras
-                        );
+                    let produto = await new ProdutoServiceDAO(
+                        req.connection
+                    ).buscaEspecificaCodigoBarras(vendas[i].codigoBarras);
                     produtos.push({
                         codigoBarras: produto.codigoBarras,
                         descricao: produto.descricao,
@@ -284,12 +298,12 @@ module.exports = {
             let servicos = [];
             if (executaFuncao) {
                 for (let i in executaFuncao) {
-                    let servico = await ServicoService.buscarPorId(
-                        executaFuncao[i].idServico
-                    );
-                    let funcionario = await FuncionarioService.buscarPorId(
-                        executaFuncao[i].idFuncionario
-                    );
+                    let servico = await new ServicoServiceDAO(
+                        req.connection
+                    ).buscarPorId(executaFuncao[i].idServico);
+                    let funcionario = await new FuncionarioServiceDAO(
+                        req.connection
+                    ).buscarPorId(executaFuncao[i].idFuncionario);
                     servicos.push({
                         idServico: executaFuncao[i].idServico,
                         descricaoServico: servico.descricaoServico,
@@ -317,58 +331,62 @@ module.exports = {
         res.json(json);
     },
 
-    fecharOrdemServicoPaga: async (idOrdemServico) => {
-        await OrdemServicoService.alterarStatus(idOrdemServico, true).catch(
-            (error) => {
-                throw new AppError(error, 500);
-            }
-        );
-        // Alterar estoque dos produtos vendidos pela OS
-        let osDetalhes = await OrdemServicoService.buscarOSDetalhes(
-            idOrdemServico
-        ).catch((error) => {
-            throw new AppError(error, 500);
-        });
-        let vendas = await OrdemServicoService.buscarVendaPorOSDetalhes(
-            osDetalhes.idOSDetalhes
-        ).catch((error) => {
-            throw new AppError(error, 500);
-        });
-        for (let j in vendas) {
-            await ProdutoService.alterarEstoque(
-                vendas[j].codigoBarras,
-                vendas[j].quantidadeVendida * -1
-            ).catch((error) => {
+    fecharOrdemServicoPaga: async (connection, idOrdemServico) => {
+        await new OrdemServicoServiceDAO(connection)
+            .alterarStatus(idOrdemServico, true)
+            .catch((error) => {
                 throw new AppError(error, 500);
             });
+        // Alterar estoque dos produtos vendidos pela OS
+        let osDetalhes = await new OrdemServicoServiceDAO(connection)
+            .buscarOSDetalhes(idOrdemServico)
+            .catch((error) => {
+                throw new AppError(error, 500);
+            });
+        let vendas = await new OrdemServicoServiceDAO(connection)
+            .buscarVendaPorOSDetalhes(osDetalhes.idOSDetalhes)
+            .catch((error) => {
+                throw new AppError(error, 500);
+            });
+        for (let j in vendas) {
+            await new ProdutoServiceDAO(connection)
+                .alterarEstoque(
+                    vendas[j].codigoBarras,
+                    vendas[j].quantidadeVendida * -1
+                )
+                .catch((error) => {
+                    throw new AppError(error, 500);
+                });
         }
         // Fim da alteração no estoque dos produtos vendidos
     },
 
-    abrirOrdemServicoPaga: async (idOrdemServico) => {
-        await OrdemServicoService.alterarStatus(idOrdemServico, false).catch(
-            (error) => {
-                throw new AppError(error, 500);
-            }
-        );
-        // Alterar estoque dos produtos vendidos pela OS
-        let osDetalhes = await OrdemServicoService.buscarOSDetalhes(
-            idOrdemServico
-        ).catch((error) => {
-            throw new AppError(error, 500);
-        });
-        let vendas = await OrdemServicoService.buscarVendaPorOSDetalhes(
-            osDetalhes.idOSDetalhes
-        ).catch((error) => {
-            throw new AppError(error, 500);
-        });
-        for (let j in vendas) {
-            await ProdutoService.alterarEstoque(
-                vendas[j].codigoBarras,
-                vendas[j].quantidadeVendida
-            ).catch((error) => {
+    abrirOrdemServicoPaga: async (connection, idOrdemServico) => {
+        await new OrdemServicoServiceDAO(connection)
+            .alterarStatus(idOrdemServico, false)
+            .catch((error) => {
                 throw new AppError(error, 500);
             });
+        // Alterar estoque dos produtos vendidos pela OS
+        let osDetalhes = await new OrdemServicoServiceDAO(connection)
+            .buscarOSDetalhes(idOrdemServico)
+            .catch((error) => {
+                throw new AppError(error, 500);
+            });
+        let vendas = await new OrdemServicoServiceDAO(connection)
+            .buscarVendaPorOSDetalhes(osDetalhes.idOSDetalhes)
+            .catch((error) => {
+                throw new AppError(error, 500);
+            });
+        for (let j in vendas) {
+            await new ProdutoServiceDAO(connection)
+                .alterarEstoque(
+                    vendas[j].codigoBarras,
+                    vendas[j].quantidadeVendida
+                )
+                .catch((error) => {
+                    throw new AppError(error, 500);
+                });
         }
         // Fim da alteração no estoque dos produtos vendidos
     },
@@ -408,9 +426,9 @@ module.exports = {
                     );
                 }
 
-                let produto = await ProdutoService.buscaEspecificaCodigoBarras(
-                    codigoBarras
-                );
+                let produto = await new ProdutoServiceDAO(
+                    req.connection
+                ).buscaEspecificaCodigoBarras(codigoBarras);
 
                 if (!produto) {
                     throw new AppError(
@@ -436,11 +454,13 @@ module.exports = {
                     );
                 }
 
-                let servico = await ServicoService.buscarPorId(idServico);
+                let servico = await new ServicoServiceDAO(
+                    req.connection
+                ).buscarPorId(idServico);
 
-                let funcionario = await FuncionarioService.buscarPorId(
-                    idFuncionario
-                );
+                let funcionario = await new FuncionarioServiceDAO(
+                    req.connection
+                ).buscarPorId(idFuncionario);
 
                 if (!servico) {
                     throw new AppError(
@@ -469,21 +489,20 @@ module.exports = {
         }
 
         if (idCliente && placaVeiculo) {
-            let idOrdemServico = await OrdemServicoService.inserirOrdemServico(
-                idCliente,
-                placaVeiculo,
-                total,
-                km
-            ).catch((error) => {
-                throw new AppError(
-                    "Erro ao inserir uma nova ordem de serviço: " + error,
-                    500
-                );
-            });
+            let idOrdemServico = await new OrdemServicoServiceDAO(
+                req.connection
+            )
+                .inserirOrdemServico(idCliente, placaVeiculo, total, km)
+                .catch((error) => {
+                    throw new AppError(
+                        "Erro ao inserir uma nova ordem de serviço: " + error,
+                        500
+                    );
+                });
             if (idOrdemServico) {
-                let idOSDetalhes = await OrdemServicoService.inserirOSDetalhes(
-                    idOrdemServico
-                );
+                let idOSDetalhes = await new OrdemServicoServiceDAO(
+                    req.connection
+                ).inserirOSDetalhes(idOrdemServico);
                 if (valores.produtos) {
                     for (let i in valores.produtos) {
                         let codigoBarras = valores.produtos[i].codigoBarras;
@@ -492,20 +511,22 @@ module.exports = {
                         let precoTotal = valores.produtos[i].precoTotal * 1;
                         let precoUnitario =
                             valores.produtos[i].precoUnitario * 1;
-                        await OrdemServicoService.inserirProdutoHasOSDetalhes(
-                            codigoBarras,
-                            idOSDetalhes,
-                            quantidadeVendida,
-                            precoTotal,
-                            precoUnitario
-                        ).catch((error) => {
-                            console.log(
-                                "O produto na posição " +
-                                    i +
-                                    " não foi inserido." +
-                                    error
-                            );
-                        });
+                        await new OrdemServicoServiceDAO(req.connection)
+                            .inserirProdutoHasOSDetalhes(
+                                codigoBarras,
+                                idOSDetalhes,
+                                quantidadeVendida,
+                                precoTotal,
+                                precoUnitario
+                            )
+                            .catch((error) => {
+                                console.log(
+                                    "O produto na posição " +
+                                        i +
+                                        " não foi inserido." +
+                                        error
+                                );
+                            });
                     }
                 }
                 if (valores.servicos) {
@@ -513,19 +534,21 @@ module.exports = {
                         let idServico = valores.servicos[i].idServico;
                         let idFuncionario = valores.servicos[i].idFuncionario;
                         let observacao = valores.servicos[i].observacao;
-                        await OrdemServicoService.inserirExecutaFuncao(
-                            idServico,
-                            idFuncionario,
-                            observacao,
-                            idOSDetalhes
-                        ).catch((error) => {
-                            console.log(
-                                "O serviço não foi inserido na posição " +
-                                    i +
-                                    " não foi inserido." +
-                                    error
-                            );
-                        });
+                        await new OrdemServicoServiceDAO(req.connection)
+                            .inserirExecutaFuncao(
+                                idServico,
+                                idFuncionario,
+                                observacao,
+                                idOSDetalhes
+                            )
+                            .catch((error) => {
+                                console.log(
+                                    "O serviço não foi inserido na posição " +
+                                        i +
+                                        " não foi inserido." +
+                                        error
+                                );
+                            });
                     }
                 }
             }
@@ -577,9 +600,9 @@ module.exports = {
                     );
                 }
 
-                let produto = await ProdutoService.buscaEspecificaCodigoBarras(
-                    codigoBarras
-                );
+                let produto = await new ProdutoServiceDAO(
+                    req.connection
+                ).buscaEspecificaCodigoBarras(codigoBarras);
 
                 if (!produto) {
                     throw new AppError(
@@ -605,11 +628,13 @@ module.exports = {
                     );
                 }
 
-                let servico = await ServicoService.buscarPorId(idServico);
+                let servico = await new ServicoServiceDAO(
+                    req.connection
+                ).buscarPorId(idServico);
 
-                let funcionario = await FuncionarioService.buscarPorId(
-                    idFuncionario
-                );
+                let funcionario = await new FuncionarioServiceDAO(
+                    req.connection
+                ).buscarPorId(idFuncionario);
 
                 if (!servico) {
                     throw new AppError(
@@ -641,24 +666,26 @@ module.exports = {
         }
 
         if (idOrdemServico && idCliente && placaVeiculo) {
-            await OrdemServicoService.alterarOrdemServico(
-                idOrdemServico,
-                idCliente,
-                placaVeiculo,
-                total,
-                km
-            ).catch((error) => {
-                throw new AppError(error, 500);
-            }); // Altera os dados da ordem de serviço
-            let osDetalhes = await OrdemServicoService.buscarOSDetalhes(
-                idOrdemServico
-            );
+            await new OrdemServicoServiceDAO(req.connection)
+                .alterarOrdemServico(
+                    idOrdemServico,
+                    idCliente,
+                    placaVeiculo,
+                    total,
+                    km
+                )
+                .catch((error) => {
+                    throw new AppError(error, 500);
+                }); // Altera os dados da ordem de serviço
+            let osDetalhes = await new OrdemServicoServiceDAO(
+                req.connection
+            ).buscarOSDetalhes(idOrdemServico);
 
             if (osDetalhes) {
                 // Verificar se houve alterações em Produto_has_OSDetalhes
-                let vendas = await OrdemServicoService.buscarVendaPorOSDetalhes(
-                    osDetalhes.idOSDetalhes
-                );
+                let vendas = await new OrdemServicoServiceDAO(
+                    req.connection
+                ).buscarVendaPorOSDetalhes(osDetalhes.idOSDetalhes);
                 // console.log(vendas);
                 let produtosCadastrados = [];
                 if (vendas) {
@@ -685,20 +712,25 @@ module.exports = {
                             }
                         }
                         if (!produtoExiste) {
-                            await OrdemServicoService.excluirProdutoOSDetalhes(
+                            await new OrdemServicoServiceDAO(
+                                req.connection
+                            ).excluirProdutoOSDetalhes(
                                 osDetalhes.idOSDetalhes,
                                 produtosCadastrados[i].codigoBarras
                             );
                         }
                     }
                     for (let i in produtos) {
-                        let venda =
-                            await OrdemServicoService.buscarProdutoOSDetalhes(
-                                osDetalhes.idOSDetalhes,
-                                produtos[i].codigoBarras
-                            );
+                        let venda = await new OrdemServicoServiceDAO(
+                            req.connection
+                        ).buscarProdutoOSDetalhes(
+                            osDetalhes.idOSDetalhes,
+                            produtos[i].codigoBarras
+                        );
                         if (!venda) {
-                            await OrdemServicoService.inserirProdutoHasOSDetalhes(
+                            await new OrdemServicoServiceDAO(
+                                req.connection
+                            ).inserirProdutoHasOSDetalhes(
                                 produtos[i].codigoBarras,
                                 osDetalhes.idOSDetalhes,
                                 produtos[i].quantidadeVendida,
@@ -711,7 +743,9 @@ module.exports = {
                                 produtos[i].quantidadeVendida ||
                             venda.precoTotal !== produtos[i].precoTotal
                         ) {
-                            await OrdemServicoService.alterarProdutoOSDetalhes(
+                            await new OrdemServicoServiceDAO(
+                                req.connection
+                            ).alterarProdutoOSDetalhes(
                                 osDetalhes.idOSDetalhes,
                                 produtos[i].codigoBarras,
                                 produtos[i].quantidadeVendida,
@@ -721,10 +755,9 @@ module.exports = {
                         }
                     }
                 }
-                let executaFuncao =
-                    await OrdemServicoService.buscarExecutaFuncaoGeral(
-                        osDetalhes.idOSDetalhes
-                    );
+                let executaFuncao = await new OrdemServicoServiceDAO(
+                    req.connection
+                ).buscarExecutaFuncaoGeral(osDetalhes.idOSDetalhes);
 
                 let servicosCadastrados = [];
                 if (executaFuncao) {
@@ -753,7 +786,9 @@ module.exports = {
                             }
                         }
                         if (!servicoExiste) {
-                            await OrdemServicoService.excluirExecutaFuncao(
+                            await new OrdemServicoServiceDAO(
+                                req.connection
+                            ).excluirExecutaFuncao(
                                 osDetalhes.idOSDetalhes,
                                 servicosCadastrados[i].idServico,
                                 servicosCadastrados[i].idFuncionario
@@ -761,14 +796,17 @@ module.exports = {
                         }
                     }
                     for (let i in servicos) {
-                        let execucao =
-                            await OrdemServicoService.buscarExecutaFuncaoEspecifica(
-                                osDetalhes.idOSDetalhes,
-                                servicos[i].idServico,
-                                servicos[i].idFuncionario
-                            );
+                        let execucao = await new OrdemServicoServiceDAO(
+                            req.connection
+                        ).buscarExecutaFuncaoEspecifica(
+                            osDetalhes.idOSDetalhes,
+                            servicos[i].idServico,
+                            servicos[i].idFuncionario
+                        );
                         if (!execucao) {
-                            await OrdemServicoService.inserirExecutaFuncao(
+                            await new OrdemServicoServiceDAO(
+                                req.connection
+                            ).inserirExecutaFuncao(
                                 servicos[i].idServico,
                                 servicos[i].idFuncionario,
                                 servicos[i].observacao,
@@ -776,7 +814,9 @@ module.exports = {
                             );
                         }
                         if (execucao.observacao != servicos[i].observacao) {
-                            await OrdemServicoService.alterarExecutaFuncao(
+                            await new OrdemServicoServiceDAO(
+                                req.connection
+                            ).alterarExecutaFuncao(
                                 servicos[i].idServico,
                                 servicos[i].idFuncionario,
                                 servicos[i].observacao,
@@ -805,43 +845,48 @@ module.exports = {
 
         let idOrdemServico = req.params.id;
         if (idOrdemServico) {
-            let osDetalhes = await OrdemServicoService.buscarOSDetalhes(
-                idOrdemServico
-            );
+            let osDetalhes = await new OrdemServicoServiceDAO(
+                req.connection
+            ).buscarOSDetalhes(idOrdemServico);
 
             if (osDetalhes) {
-                let vendas = await OrdemServicoService.buscarVendaPorOSDetalhes(
-                    osDetalhes.idOSDetalhes
-                );
+                let vendas = await new OrdemServicoServiceDAO(
+                    req.connection
+                ).buscarVendaPorOSDetalhes(osDetalhes.idOSDetalhes);
                 if (vendas) {
                     for (let i in vendas) {
-                        await OrdemServicoService.excluirProdutoOSDetalhes(
+                        await new OrdemServicoServiceDAO(
+                            req.connection
+                        ).excluirProdutoOSDetalhes(
                             osDetalhes.idOSDetalhes,
                             vendas[i].codigoBarras
                         );
                     }
                 }
-                let executaFuncao =
-                    await OrdemServicoService.buscarExecutaFuncaoGeral(
-                        osDetalhes.idOSDetalhes
-                    );
+                let executaFuncao = await new OrdemServicoServiceDAO(
+                    req.connection
+                ).buscarExecutaFuncaoGeral(osDetalhes.idOSDetalhes);
                 if (executaFuncao) {
                     for (let i in executaFuncao) {
-                        await OrdemServicoService.excluirExecutaFuncao(
+                        await new OrdemServicoServiceDAO(
+                            req.connection
+                        ).excluirExecutaFuncao(
                             osDetalhes.idOSDetalhes,
                             executaFuncao[i].idServico,
                             executaFuncao[i].idFuncionario
                         );
                     }
                 }
-                await OrdemServicoService.excluirOSDetalhes(
-                    osDetalhes.idOSDetalhes
-                ).catch((error) => {
-                    throw new AppError(error, 500);
-                });
+                await new OrdemServicoServiceDAO(req.connection)
+                    .excluirOSDetalhes(osDetalhes.idOSDetalhes)
+                    .catch((error) => {
+                        throw new AppError(error, 500);
+                    });
             }
 
-            await OrdemServicoService.excluirOrdemServico(idOrdemServico);
+            await new OrdemServicoServiceDAO(
+                req.connection
+            ).excluirOrdemServico(idOrdemServico);
 
             json.result = "Campos enviados";
         } else {

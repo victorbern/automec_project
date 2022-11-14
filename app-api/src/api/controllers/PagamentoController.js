@@ -1,22 +1,24 @@
 const { json } = require("body-parser");
-const ClienteService = require("../services/ClienteService");
-const OrdemServicoService = require("../services/OrdemServicoService");
-const PagamentoService = require("../services/PagamentoService");
-const VeiculoService = require("../services/VeiculoService");
-const VendaDiretaService = require("../services/VendaDiretaService");
 const qs = require("qs");
 const AppError = require("../errors/AppError");
-const ProdutoService = require("../services/ProdutoService");
 const OrdemServicoController = require("./OrdemServicoController");
+const PagamentoServiceDAO = require("../services/PagamentoServiceDAO");
+const OrdemServicoServiceDAO = require("../services/OrdemServicoServiceDAO");
+const VeiculoServiceDAO = require("../services/VeiculoServiceDAO");
+const ProdutoServiceDAO = require("../services/ProdutoServiceDAO");
+const ClienteServiceDAO = require("../services/ClienteServiceDAO");
+const VendaDiretaServiceDAO = require("../services/VendaDiretaServiceDAO");
 
 module.exports = {
     buscarTodos: async (req, res) => {
         let json = { error: "", result: [] };
 
         // Busca todos os pagamentos cadastrados no banco de dados
-        let pagamentos = await PagamentoService.buscarTodos().catch((error) => {
-            throw new AppError(error, 400);
-        });
+        let pagamentos = await new PagamentoServiceDAO(req.connection)
+            .buscarTodos()
+            .catch((error) => {
+                throw new AppError(error, 400);
+            });
 
         // Caso nenhum pagamento seja encontrado, exibe como resultado um aviso dizendo isso
         if (!pagamentos) {
@@ -44,10 +46,9 @@ module.exports = {
             };
 
             // Busca no banco os dados referentes à tabela de DetalhePagamento referente a cada pagamento
-            let detalhePagamento =
-                await PagamentoService.buscarDetalhePagamento(
-                    pagamentos[i].idPagamento
-                ).catch((error) => {
+            let detalhePagamento = await new PagamentoServiceDAO(req.connection)
+                .buscarDetalhePagamento(pagamentos[i].idPagamento)
+                .catch((error) => {
                     throw new AppError(error, 500);
                 });
 
@@ -57,26 +58,29 @@ module.exports = {
                     // Como cada pagamento pode ter 0 ou várias ordens de serviço associadas, criamos uma variável para organizar os dados de cada OS
                     let ordemServico = null;
                     // Buscamos no banco de dados os valores referentes à ordem de serviço associada a cada pagamento
-                    ordemServico = await OrdemServicoService.buscarPorId(
-                        detalhePagamento[j].idOrdemServico
-                    ).catch((error) => {
-                        throw new AppError(error, 500);
-                    });
+                    ordemServico = await new OrdemServicoServiceDAO(
+                        req.connection
+                    )
+                        .buscarPorId(detalhePagamento[j].idOrdemServico)
+                        .catch((error) => {
+                            throw new AppError(error, 500);
+                        });
                     if (ordemServico) {
-                        let detalheOS =
-                            await OrdemServicoService.buscarOSDetalhes(
-                                ordemServico.idOrdemServico
-                            ).catch((error) => {
+                        let detalheOS = await new OrdemServicoServiceDAO(
+                            req.connection
+                        )
+                            .buscarOSDetalhes(ordemServico.idOrdemServico)
+                            .catch((error) => {
                                 throw new AppError(error, 500);
                             });
                         // Buscamos no banco de dados os valores referentes ao cliente desta ordem de serviço especificada
-                        let cliente = await ClienteService.buscarPorId(
-                            ordemServico.idCliente
-                        );
+                        let cliente = await new ClienteServiceDAO(
+                            req.connection
+                        ).buscarPorId(ordemServico.idCliente);
                         // Buscamos no banco de dados os valores referentes ao veículo desta ordem de serviço especificada
-                        let veiculo = await VeiculoService.buscaEspecificaPlaca(
-                            ordemServico.placaVeiculo
-                        );
+                        let veiculo = await new VeiculoServiceDAO(
+                            req.connection
+                        ).buscaEspecificaPlaca(ordemServico.placaVeiculo);
                         // Estou exibindo todos os dados de cliente e de veículo, porque caso um deles seja nulo,
                         //  eu exibir apenas um atributo (como cliente.nomeCliente) vai quebrar o backend
                         pagamento.ordensServico.push({
@@ -91,23 +95,23 @@ module.exports = {
                 }
             }
             // Busca todas as vendas diretas que possuam aquele pagamento associado
-            let vendaDireta = await VendaDiretaService.buscarPorPagamento(
-                pagamentos[i].idPagamento
-            );
+            let vendaDireta = await new VendaDiretaServiceDAO(
+                req.connection
+            ).buscarPorPagamento(pagamentos[i].idPagamento);
             let vendas;
 
             if (vendaDireta) {
-                vendas = await VendaDiretaService.buscarVendasPorVendaDireta(
-                    vendaDireta.idVendaDireta
-                );
+                vendas = await new VendaDiretaServiceDAO(
+                    req.connection
+                ).buscarVendasPorVendaDireta(vendaDireta.idVendaDireta);
             }
             let jsonVendas = [];
             for (let i in vendas) {
-                let produto = await ProdutoService.buscaEspecificaCodigoBarras(
-                    vendas[i].codigoBarras
-                ).catch((error) => {
-                    throw new AppError(error, 500);
-                });
+                let produto = await new ProdutoServiceDAO(req.connection)
+                    .buscaEspecificaCodigoBarras(vendas[i].codigoBarras)
+                    .catch((error) => {
+                        throw new AppError(error, 500);
+                    });
                 jsonVendas.push({
                     codigoBarras: vendas[i].codigoBarras,
                     descricao: produto.descricao,
@@ -133,11 +137,11 @@ module.exports = {
             throw new AppError("Campos não enviados", 400);
         }
 
-        let pagamento = await PagamentoService.buscarPorId(idPagamento).catch(
-            (error) => {
+        let pagamento = await new PagamentoServiceDAO(req.connection)
+            .buscarPorId(idPagamento)
+            .catch((error) => {
                 throw new AppError(error, 500);
-            }
-        );
+            });
 
         if (!pagamento) {
             json.result = "Pagamento não encontrado para o id especificado";
@@ -155,30 +159,34 @@ module.exports = {
             ordensServico: [],
         };
 
-        let detalhePagamento = await PagamentoService.buscarDetalhePagamento(
-            idPagamento
-        ).catch((error) => {
-            json.error = error;
-        });
+        let detalhePagamento = await new PagamentoServiceDAO(req.connection)
+            .buscarDetalhePagamento(idPagamento)
+            .catch((error) => {
+                json.error = error;
+            });
         if (detalhePagamento) {
             for (let i in detalhePagamento) {
-                let ordemServico = await OrdemServicoService.buscarPorId(
-                    detalhePagamento[i].idOrdemServico
-                ).catch((error) => {
-                    throw new AppError(error, 500);
-                });
-                if (ordemServico) {
-                    let detalheOS = await OrdemServicoService.buscarOSDetalhes(
-                        ordemServico.idOrdemServico
-                    ).catch((error) => {
+                let ordemServico = await new OrdemServicoServiceDAO(
+                    req.connection
+                )
+                    .buscarPorId(detalhePagamento[i].idOrdemServico)
+                    .catch((error) => {
                         throw new AppError(error, 500);
                     });
-                    let cliente = await ClienteService.buscarPorId(
-                        ordemServico.idCliente
-                    );
-                    let veiculo = await VeiculoService.buscaEspecificaPlaca(
-                        ordemServico.placaVeiculo
-                    );
+                if (ordemServico) {
+                    let detalheOS = await new OrdemServicoServiceDAO(
+                        req.connection
+                    )
+                        .buscarOSDetalhes(ordemServico.idOrdemServico)
+                        .catch((error) => {
+                            throw new AppError(error, 500);
+                        });
+                    let cliente = await new ClienteServiceDAO(
+                        req.connection
+                    ).buscarPorId(ordemServico.idCliente);
+                    let veiculo = await new VeiculoServiceDAO(
+                        req.connection
+                    ).buscaEspecificaPlaca(ordemServico.placaVeiculo);
                     // Estou exibindo todos os dados de cliente e de veículo, porque caso um deles seja nulo,
                     //  eu exibir apenas um atributo (como cliente.nomeCliente) vai quebrar o backend
                     json.result.ordensServico.push({
@@ -193,22 +201,22 @@ module.exports = {
             }
         }
         // Busca todas as vendas diretas que possuam aquele pagamento associado
-        let vendaDireta = await VendaDiretaService.buscarPorPagamento(
-            idPagamento
-        );
+        let vendaDireta = await new VendaDiretaServiceDAO(
+            req.connection
+        ).buscarPorPagamento(idPagamento);
         let vendas;
         if (vendaDireta) {
-            vendas = await VendaDiretaService.buscarVendasPorVendaDireta(
-                vendaDireta.idVendaDireta
-            );
+            vendas = await new VendaDiretaServiceDAO(
+                req.connection
+            ).buscarVendasPorVendaDireta(vendaDireta.idVendaDireta);
         }
         let jsonVendas = [];
         for (let i in vendas) {
-            let produto = await ProdutoService.buscaEspecificaCodigoBarras(
-                vendas[i].codigoBarras
-            ).catch((error) => {
-                throw new AppError(error, 500);
-            });
+            let produto = await new ProdutoServiceDAO(req.connection)
+                .buscaEspecificaCodigoBarras(vendas[i].codigoBarras)
+                .catch((error) => {
+                    throw new AppError(error, 500);
+                });
             jsonVendas.push({
                 codigoBarras: vendas[i].codigoBarras,
                 descricao: produto.descricao,
@@ -225,11 +233,11 @@ module.exports = {
         let json = { error: "", result: [] };
         let valor = req.params.valor;
 
-        let pagamentos = await PagamentoService.buscarPorValor(valor).catch(
-            (error) => {
+        let pagamentos = await new PagamentoServiceDAO(req.connection)
+            .buscarPorValor(valor)
+            .catch((error) => {
                 throw new AppError(error, 500);
-            }
-        );
+            });
 
         if (!pagamentos) {
             res.json(json);
@@ -252,10 +260,9 @@ module.exports = {
             };
 
             // Busca no banco os dados referentes à tabela de DetalhePagamento referente a cada pagamento
-            let detalhePagamento =
-                await PagamentoService.buscarDetalhePagamento(
-                    pagamentos[i].idPagamento
-                ).catch((error) => {
+            let detalhePagamento = await new PagamentoServiceDAO(req.connection)
+                .buscarDetalhePagamento(pagamentos[i].idPagamento)
+                .catch((error) => {
                     throw new AppError(error, 500);
                 });
 
@@ -265,26 +272,29 @@ module.exports = {
                     // Como cada pagamento pode ter 0 ou várias ordens de serviço associadas, criamos uma variável para organizar os dados de cada OS
                     let ordemServico = null;
                     // Buscamos no banco de dados os valores referentes à ordem de serviço associada a cada pagamento
-                    ordemServico = await OrdemServicoService.buscarPorId(
-                        detalhePagamento[j].idOrdemServico
-                    ).catch((error) => {
-                        throw new AppError(error, 500);
-                    });
+                    ordemServico = await new OrdemServicoServiceDAO(
+                        req.connection
+                    )
+                        .buscarPorId(detalhePagamento[j].idOrdemServico)
+                        .catch((error) => {
+                            throw new AppError(error, 500);
+                        });
                     if (ordemServico) {
-                        let detalheOS =
-                            await OrdemServicoService.buscarOSDetalhes(
-                                ordemServico.idOrdemServico
-                            ).catch((error) => {
+                        let detalheOS = await new OrdemServicoServiceDAO(
+                            req.connection
+                        )
+                            .buscarOSDetalhes(ordemServico.idOrdemServico)
+                            .catch((error) => {
                                 throw new AppError(error, 500);
                             });
                         // Buscamos no banco de dados os valores referentes ao cliente desta ordem de serviço especificada
-                        let cliente = await ClienteService.buscarPorId(
-                            ordemServico.idCliente
-                        );
+                        let cliente = await new ClienteServiceDAO(
+                            req.connection
+                        ).buscarPorId(ordemServico.idCliente);
                         // Buscamos no banco de dados os valores referentes ao veículo desta ordem de serviço especificada
-                        let veiculo = await VeiculoService.buscaEspecificaPlaca(
-                            ordemServico.placaVeiculo
-                        );
+                        let veiculo = await new VeiculoServiceDAO(
+                            req.connection
+                        ).buscaEspecificaPlaca(ordemServico.placaVeiculo);
                         // Estou exibindo todos os dados de cliente e de veículo, porque caso um deles seja nulo,
                         //  eu exibir apenas um atributo (como cliente.nomeCliente) vai quebrar o backend
                         pagamento.ordensServico.push({
@@ -299,23 +309,23 @@ module.exports = {
                 }
             }
             // Busca todas as vendas diretas que possuam aquele pagamento associado
-            let vendaDireta = await VendaDiretaService.buscarPorPagamento(
-                pagamentos[i].idPagamento
-            );
+            let vendaDireta = await new VendaDiretaServiceDAO(
+                req.connection
+            ).buscarPorPagamento(pagamentos[i].idPagamento);
             let vendas;
 
             if (vendaDireta) {
-                vendas = await VendaDiretaService.buscarVendasPorVendaDireta(
-                    vendaDireta.idVendaDireta
-                );
+                vendas = await new VendaDiretaServiceDAO(
+                    req.connection
+                ).buscarVendasPorVendaDireta(vendaDireta.idVendaDireta);
             }
             let jsonVendas = [];
             for (let i in vendas) {
-                let produto = await ProdutoService.buscaEspecificaCodigoBarras(
-                    vendas[i].codigoBarras
-                ).catch((error) => {
-                    throw new AppError(error, 500);
-                });
+                let produto = await new ProdutoServiceDAO(req.connection)
+                    .buscaEspecificaCodigoBarras(vendas[i].codigoBarras)
+                    .catch((error) => {
+                        throw new AppError(error, 500);
+                    });
                 jsonVendas.push({
                     codigoBarras: vendas[i].codigoBarras,
                     descricao: produto.descricao,
@@ -347,7 +357,7 @@ module.exports = {
         let vendaDireta = valores.vendaDireta;
         for (let i in ordensServico) {
             if (
-                !(await OrdemServicoService.isPaga(
+                !(await new OrdemServicoServiceDAO(req.connection).isPaga(
                     ordensServico[i].idOrdemServico
                 ))
             ) {
@@ -357,47 +367,82 @@ module.exports = {
                 );
             }
         }
+        if (!desconto) {
+            desconto = 0;
+        }
         if (subtotal && total && formaPagamento) {
-            let IdPagamento = await PagamentoService.inserirPagamento(
-                subtotal,
-                total,
-                formaPagamento,
-                desconto
-            ).catch((error) => {
-                throw new AppError(error, 500);
-            });
+            let IdPagamento = await new PagamentoServiceDAO(req.connection)
+                .inserirPagamento(subtotal, total, formaPagamento, desconto)
+                .catch((error) => {
+                    throw new AppError(error, 500);
+                });
             if (ordensServico) {
                 for (let i in ordensServico) {
-                    await OrdemServicoController.fecharOrdemServicoPaga(
-                        ordensServico[i].idOrdemServico
-                    );
-                    await PagamentoService.inserirDetalhePagamento(
-                        ordensServico[i].idOrdemServico,
-                        IdPagamento
-                    ).catch((error) => {
-                        throw new AppError(error, 500);
-                    });
+                    // Atribuir o valor isPaga = true na ordem de serviço vendida
+                    await new OrdemServicoServiceDAO(req.connection)
+                        .alterarStatus(ordensServico[i].idOrdemServico, true)
+                        .catch((error) => {
+                            throw new AppError(error, 500);
+                        });
+                    // Alterar estoque dos produtos vendidos pela OS
+                    let osDetalhes = await new OrdemServicoServiceDAO(
+                        req.connection
+                    )
+                        .buscarOSDetalhes(ordensServico[i].idOrdemServico)
+                        .catch((error) => {
+                            throw new AppError(error, 500);
+                        });
+                    let vendas = await new OrdemServicoServiceDAO(
+                        req.connection
+                    )
+                        .buscarVendaPorOSDetalhes(osDetalhes.idOSDetalhes)
+                        .catch((error) => {
+                            throw new AppError(error, 500);
+                        });
+                    for (let j in vendas) {
+                        await new ProdutoServiceDAO(req.connection)
+                            .alterarEstoque(
+                                vendas[j].codigoBarras,
+                                vendas[j].quantidadeVendida * -1
+                            )
+                            .catch((error) => {
+                                throw new AppError(error, 500);
+                            });
+                    }
+                    // Fim da remoção dos produtos vendidos do estoque
+                    // Fim da atribuição do valor isPaga = false da ordem de serviço que foi cancelada
+                    await new PagamentoServiceDAO(req.connection)
+                        .inserirDetalhePagamento(
+                            ordensServico[i].idOrdemServico,
+                            IdPagamento
+                        )
+                        .catch((error) => {
+                            throw new AppError(error, 500);
+                        });
                 }
             }
             if (vendaDireta) {
-                let IdVendaDireta = await VendaDiretaService.inserirVendaDireta(
-                    IdPagamento,
-                    vendaDireta.total
-                ).catch((error) => {
-                    throw new AppError(error, 500);
-                });
+                let IdVendaDireta = await new VendaDiretaServiceDAO(
+                    req.connection
+                )
+                    .inserirVendaDireta(IdPagamento, vendaDireta.total)
+                    .catch((error) => {
+                        throw new AppError(error, 500);
+                    });
                 let produtos = vendaDireta.produtos;
                 if (produtos) {
                     for (let i in produtos) {
-                        await VendaDiretaService.inserirProduto_has_VendaDireta(
-                            IdVendaDireta,
-                            produtos[i].codigoBarras,
-                            produtos[i].quantidadeVendida,
-                            produtos[i].precoTotal,
-                            produtos[i].precoUnitario
-                        ).catch((error) => {
-                            throw new AppError(error, 500);
-                        });
+                        await new VendaDiretaServiceDAO(req.connection)
+                            .inserirProduto_has_VendaDireta(
+                                IdVendaDireta,
+                                produtos[i].codigoBarras,
+                                produtos[i].quantidadeVendida,
+                                produtos[i].precoTotal,
+                                produtos[i].precoUnitario
+                            )
+                            .catch((error) => {
+                                throw new AppError(error, 500);
+                            });
                     }
                 }
             }
@@ -424,7 +469,7 @@ module.exports = {
     //     let vendasDiretas = valores.vendasDiretas;
 
     //     if (subtotal && total && formaPagamento) {
-    //         await PagamentoService.alterarPagamento(
+    //         await new PagamentoServiceDAO(req.connection).alterarPagamento(
     //             idPagamento,
     //             subtotal,
     //             total,
@@ -434,7 +479,7 @@ module.exports = {
     //             throw new AppError(error, 500);
     //         });
     //         let detalhePagamento =
-    //             await PagamentoService.buscarDetalhePagamento(
+    //             await new PagamentoServiceDAO(req.connection).buscarDetalhePagamento(
     //                 idPagamento
     //             ).catch((error) => {
     //                 throw new AppError(error, 500);
@@ -454,62 +499,92 @@ module.exports = {
         let idPagamento = req.params.id;
 
         if (idPagamento) {
-            let detalhePagamento =
-                await PagamentoService.buscarDetalhePagamento(
-                    idPagamento
-                ).catch((error) => {
+            let detalhePagamento = await new PagamentoServiceDAO(req.connection)
+                .buscarDetalhePagamento(idPagamento)
+                .catch((error) => {
                     throw new AppError(error, 500);
                 });
             for (let i in detalhePagamento) {
-                await OrdemServicoController.abrirOrdemServicoPaga(
-                    detalhePagamento[i].idOrdemServico
-                );
-                await PagamentoService.excluirDetalhePagamento(
-                    idPagamento,
-                    detalhePagamento[i].idOrdemServico
-                ).catch((error) => {
-                    throw new AppError(error, 500);
-                });
+                // Atribuição do valor isPaga = false para ordem de serviço do pagamento cancelado e devolução dos produtos ao estoque
+                await new OrdemServicoServiceDAO(connection)
+                    .alterarStatus(detalhePagamento[i].idOrdemServico, false)
+                    .catch((error) => {
+                        throw new AppError(error, 500);
+                    });
+                // Alterar estoque dos produtos vendidos pela OS
+                let osDetalhes = await new OrdemServicoServiceDAO(connection)
+                    .buscarOSDetalhes(detalhePagamento[i].idOrdemServico)
+                    .catch((error) => {
+                        throw new AppError(error, 500);
+                    });
+                let vendas = await new OrdemServicoServiceDAO(connection)
+                    .buscarVendaPorOSDetalhes(osDetalhes.idOSDetalhes)
+                    .catch((error) => {
+                        throw new AppError(error, 500);
+                    });
+                for (let j in vendas) {
+                    await new ProdutoServiceDAO(connection)
+                        .alterarEstoque(
+                            vendas[j].codigoBarras,
+                            vendas[j].quantidadeVendida
+                        )
+                        .catch((error) => {
+                            throw new AppError(error, 500);
+                        });
+                }
+                // Fim da alteração no estoque dos produtos vendidos
+                // Fim da atribuição do valor isPaga = false da ordem de serviço que foi cancelada
+                await new PagamentoServiceDAO(req.connection)
+                    .excluirDetalhePagamento(
+                        idPagamento,
+                        detalhePagamento[i].idOrdemServico
+                    )
+                    .catch((error) => {
+                        throw new AppError(error, 500);
+                    });
             }
-            let vendaDireta = await VendaDiretaService.buscarPorPagamento(
-                idPagamento
-            );
+            let vendaDireta = await new VendaDiretaServiceDAO(
+                req.connection
+            ).buscarPorPagamento(idPagamento);
 
             console.log();
 
             if (vendaDireta) {
                 // Percorre todas as vendas de venda direta para excluir Produto_has_VendaDireta uma por uma
-                let vendas =
-                    await VendaDiretaService.buscarVendasPorVendaDireta(
-                        vendaDireta.idVendaDireta
-                    ).catch((error) => {
+                let vendas = await new VendaDiretaServiceDAO(req.connection)
+                    .buscarVendasPorVendaDireta(vendaDireta.idVendaDireta)
+                    .catch((error) => {
                         throw new AppError(error, 500);
                     });
                 for (let i in vendas) {
-                    await VendaDiretaService.excluirProdutoVendaDireta(
-                        vendaDireta.idVendaDireta,
-                        vendas[i].codigoBarras
-                    ).catch((error) => {
-                        throw new AppError(error, 500);
-                    });
-                    await ProdutoService.alterarEstoque(
-                        vendas[i].codigoBarras,
-                        vendas[i].quantidadeVendida
-                    ).catch((error) => {
-                        throw new AppError(error, 500);
-                    });
+                    await new VendaDiretaServiceDAO(req.connection)
+                        .excluirProdutoVendaDireta(
+                            vendaDireta.idVendaDireta,
+                            vendas[i].codigoBarras
+                        )
+                        .catch((error) => {
+                            throw new AppError(error, 500);
+                        });
+                    await new ProdutoServiceDAO(req.connection)
+                        .alterarEstoque(
+                            vendas[i].codigoBarras,
+                            vendas[i].quantidadeVendida
+                        )
+                        .catch((error) => {
+                            throw new AppError(error, 500);
+                        });
                 }
-                await VendaDiretaService.excluirVendaDireta(
-                    vendaDireta.idVendaDireta
-                ).catch((error) => {
+                await new VendaDiretaServiceDAO(req.connection)
+                    .excluirVendaDireta(vendaDireta.idVendaDireta)
+                    .catch((error) => {
+                        throw new AppError(error, 500);
+                    });
+            }
+            await new PagamentoServiceDAO(req.connection)
+                .excluirPagamento(idPagamento)
+                .catch((error) => {
                     throw new AppError(error, 500);
                 });
-            }
-            await PagamentoService.excluirPagamento(idPagamento).catch(
-                (error) => {
-                    throw new AppError(error, 500);
-                }
-            );
             json.result = "Pagamento excluido com sucesso!";
         } else {
             throw new AppError("Campos não enviados", 400);
