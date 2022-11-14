@@ -1,7 +1,7 @@
 const { json } = require("body-parser");
 const AppError = require("../errors/AppError");
-const RelatorioService = require("../services/RelatorioService");
 var sd = require("silly-datetime");
+const RelatorioServiceDAO = require("../services/RelatorioServiceDAO");
 // const pagamentoPDF = require("../classes/pagamentos");
 
 module.exports = {
@@ -13,12 +13,11 @@ module.exports = {
         dataDe = sd.format(dataDe, "YYYY-MM-DD");
         dataAte = sd.format(dataAte, "YYYY-MM-DD");
 
-        let pagamentos = await RelatorioService.buscarPagamentos(
-            dataDe,
-            dataAte
-        ).catch((error) => {
-            throw new AppError(error, 500);
-        });
+        let pagamentos = await new RelatorioServiceDAO(req.connection)
+            .buscarPagamentos(dataDe, dataAte)
+            .catch((error) => {
+                throw new AppError(error, 500);
+            });
 
         // Soma todos os totais de pagamento
         let total = 0;
@@ -90,11 +89,11 @@ module.exports = {
 
         dataAte = sd.format(dataAte, "YYYY-MM-DD");
 
-        let ordens = await RelatorioService.buscarOrdens(dataDe, dataAte).catch(
-            (error) => {
+        let ordens = await new RelatorioServiceDAO(req.connection)
+            .buscarOrdens(dataDe, dataAte)
+            .catch((error) => {
                 throw new AppError(error, 500);
-            }
-        );
+            });
 
         // Soma todos os totais de pagamento
         let total = 0;
@@ -130,19 +129,17 @@ module.exports = {
         dataDe = sd.format(dataDe, "YYYY-MM-DD");
         dataAte = sd.format(dataAte, "YYYY-MM-DD");
 
-        let vendasOS = await RelatorioService.buscarProdutosOrdemServico(
-            dataDe,
-            dataAte
-        ).catch((error) => {
-            throw new AppError(error, 500);
-        });
+        let vendasOS = await new RelatorioServiceDAO(req.connection)
+            .buscarProdutosOrdemServico(dataDe, dataAte)
+            .catch((error) => {
+                throw new AppError(error, 500);
+            });
 
-        let vendasVD = await RelatorioService.buscarProdutosVendaDireta(
-            dataDe,
-            dataAte
-        ).catch((error) => {
-            throw new AppError(error, 500);
-        });
+        let vendasVD = await new RelatorioServiceDAO(req.connection)
+            .buscarProdutosVendaDireta(dataDe, dataAte)
+            .catch((error) => {
+                throw new AppError(error, 500);
+            });
 
         vendasOS.forEach((vendaOS, index, array) => {
             let found = vendasVD.find(

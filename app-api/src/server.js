@@ -3,7 +3,8 @@ require("express-async-errors");
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-let dados = require("./database");
+const pool = require("./pool-factory");
+const connectionDB = require("./api/middleware/connectionDB");
 // const auth = require("../../auth/middleware/auth");
 const auth = require("./api/middleware/auth");
 // dados.inserirDados();
@@ -14,7 +15,7 @@ const routes = require("./api/routes/routes");
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use("/api", /*auth,*/ routes);
+app.use("/api", auth, connectionDB(pool), routes);
 app.get("/", (req, res) => res.send("Aplicação Rodando!"));
 
 app.use((error, req, res, next) => {

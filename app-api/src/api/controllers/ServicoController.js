@@ -1,15 +1,16 @@
 const { json } = require("body-parser");
 const AppError = require("../errors/AppError");
 const ServicoService = require("../services/ServicoService");
-const models = require("../models");
-const Servico = models.servicoModel;
+const ServicoServiceDAO = require("../services/ServicoServiceDAO");
 
 module.exports = {
     buscarTodos: async (req, res) => {
         let json = { error: "", result: [] };
-        let servicos = await Servico.findAll().catch((error) => {
-            throw new AppError(error, 500);
-        });
+        let servicos = await new ServicoServiceDAO(req.connection)
+            .buscarTodos()
+            .catch((error) => {
+                throw new AppError(error, 500);
+            });
         for (let i in servicos) {
             json.result.push({
                 idServico: servicos[i].idServico,
@@ -23,10 +24,12 @@ module.exports = {
 
     buscarPorId: async (req, res) => {
         let json = { error: "", result: {} };
-        let idServico = req.params.id;
-        let servico = await Servico.findByPk(idServico).catch((error) => {
-            throw new AppError(error, 500);
-        });
+        let id = req.params.id;
+        let servico = await new ServicoServiceDAO(req.connection)
+            .buscarPorId(id)
+            .catch((error) => {
+                throw new AppError(error, 500);
+            });
 
         if (servico) {
             json.result = servico;
@@ -38,22 +41,11 @@ module.exports = {
     buscaPorValor: async (req, res) => {
         let json = { error: "", result: [] };
         let valor = req.params.valor;
-        let servicos = await Servico.findAll({
-            where: {
-                [Op.or]: [
-                    {
-                        idServico: {
-                            [Op.substring]: valor,
-                        },
-                    },
-                    {
-                        descricaoServico: {
-                            [Op.substring]: valor,
-                        },
-                    },
-                ],
-            },
-        });
+        let servicos = await new ServicoServiceDAO(req.connection)
+            .buscaPorValor(valor)
+            .catch((error) => {
+                throw new AppError(error, 500);
+            });
 
         for (let i in servicos) {
             json.result.push({
@@ -73,13 +65,16 @@ module.exports = {
         let precoServico = req.body.precoServico;
 
         if (descricaoServico && precoServico) {
-            await Servico.create({
-                descricaoServico,
-                precoServico,
-            }).catch((error) => {
-                throw new AppError(error, 500);
-            });
-            json.result = "Dados inseridos com sucesso!";
+            let IdServico = await new ServicoServiceDAO(req.connection)
+                .inserirServico(descricaoServico, precoServico)
+                .catch((error) => {
+                    throw new AppError(error, 500);
+                });
+            json.result = {
+                idServico: IdServico,
+                descricaoServico: descricaoServico,
+                precoServico: precoServico,
+            };
         } else {
             throw new AppError("Campos não enviados", 400);
         }
@@ -90,23 +85,21 @@ module.exports = {
     alterarServico: async (req, res) => {
         let json = { error: "", result: {} };
 
-        let idServico = req.params.id;
+        let id = req.params.id;
         let descricaoServico = req.body.descricaoServico;
         let precoServico = req.body.precoServico;
 
-        if (idServico && descricaoServico && precoServico) {
-            await Servico.update(
-                {
-                    descricaoServico: descricaoServico,
-                    precoServico: precoServico,
-                },
-                {
-                    where: { idServico: idServico },
-                }
-            ).catch((error) => {
-                throw new AppError(error, 500);
-            });
-            json.result = "Dados alterados com sucesso!";
+        if (id && descricaoServico && precoServico) {
+            await new ServicoServiceDAO(req.connection)
+                .alterarServico(id, descricaoServico, precoServico)
+                .catch((error) => {
+                    throw new AppError(error, 500);
+                });
+            json.result = {
+                id,
+                descricaoServico,
+                precoServico,
+            };
         } else {
             throw new AppError("Campos não enviados", 400);
         }
@@ -117,15 +110,17 @@ module.exports = {
     excluirServico: async (req, res) => {
         let json = { error: "", result: {} };
 
-        let idServico = req.params.id;
+        let id = req.params.id;
 
-        if (idServico) {
-            await Servico.destroy({ where: { idServico: idServico } }).catch(
-                (error) => {
+        if (id) {
+            await new ServicoServiceDAO(req.connection)
+                .excluirServico(id)
+                .catch((error) => {
                     throw new AppError(error, 500);
-                }
-            );
-            json.result = "Serviço excluido com sucesso!";
+                });
+            json.result = {
+                id,
+            };
         } else {
             throw new AppError("Campos não enviados", 400);
         }
