@@ -1,4 +1,4 @@
-FROM node:latest
+FROM node:11-alpine
 RUN mkdir -p /home/node/auth/node_modules && chown -R node:node /home/node/auth
 WORKDIR /home/node/auth
 COPY package*.json ./
