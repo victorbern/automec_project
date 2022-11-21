@@ -1,0 +1,15 @@
+Passo 1:
+Instalar o AWS CLI
+
+Passo 2:
+Instalar o docker-machine na máquina
+
+Comandos:
+App Service / Container Instance
+
+// AZURE
+
+az acr login --name <nome rc>
+docker login azure
+docker context create aci <nome aci>
+docker context use <nome aci>
