@@ -1,6 +1,6 @@
 import React from "react";
-import './style.css'
-import qs from 'qs'
+import "./style.css";
+import qs from "qs";
 import Paginator from "../Paginator/Paginator";
 import Header from "../Header/Header";
 import Listagem from "../Listagem/Listagem";
@@ -9,25 +9,24 @@ import ModalExcluir from "./ModalExcluir";
 import ModalIncluir from "./ModalIncluir";
 
 class Veiculos extends React.Component {
-
-    constructor(props){
+    constructor(props) {
         super(props);
 
         this.state = {
-            placa: '',
-            marca: '',
-            modelo: '',
-            ano: '',
-            capacidadeOleo: '',
-            cor: '',
-            idCliente:'',
-            nomeCliente: '',
-            celularCliente:'',
+            placa: "",
+            marca: "",
+            modelo: "",
+            ano: "",
+            capacidadeOleo: "",
+            cor: "",
+            idCliente: "",
+            nomeCliente: "",
+            celularCliente: "",
             input: false,
-            modalIncluir:false,
-            modalDetalhar:false,
-            modalExcluir:false,
-            tituloClasse: 'Veículos',
+            modalIncluir: false,
+            modalDetalhar: false,
+            modalExcluir: false,
+            tituloClasse: "Veículos",
             offset: 0,
             tableData: [],
             orgtableData: [],
@@ -36,12 +35,12 @@ class Veiculos extends React.Component {
             clientes: [],
             pageCount: 0,
             column: [
-                { heading: 'Placa', value: 'placaVeiculo' },
-                { heading: 'Marca', value: 'marca' },
-                { heading: 'Modelo', value: 'modelo' },
-                { heading: 'Capacidade de Óleo', value: 'capacidadeOleo' }
-              ]
-        }
+                { heading: "Placa", value: "placaVeiculo" },
+                { heading: "Marca", value: "marca" },
+                { heading: "Modelo", value: "modelo" },
+                { heading: "Capacidade de Óleo", value: "capacidadeOleo" },
+            ],
+        };
         this.handlePageClick = this.handlePageClick.bind(this);
         props.funcNav(true);
     }
@@ -50,278 +49,257 @@ class Veiculos extends React.Component {
         const selectedPage = e.selected;
         const offset = selectedPage * this.state.perPage;
 
-        this.setState({
-            currentPage: selectedPage,
-            offset: offset
-        }, () => {
-            this.loadMoreData()
-        });
+        this.setState(
+            {
+                currentPage: selectedPage,
+                offset: offset,
+            },
+            () => {
+                this.loadMoreData();
+            }
+        );
     };
 
     loadMoreData() {
-		const data = this.state.orgtableData;
-		
-		const slice = data.slice(this.state.offset, this.state.offset + this.state.perPage)
+        const data = this.state.orgtableData;
+
+        const slice = data.slice(
+            this.state.offset,
+            this.state.offset + this.state.perPage
+        );
 
         this.setState({
-			pageCount: Math.ceil(data.length / this.state.perPage),
-			tableData:slice
-		})
+            pageCount: Math.ceil(data.length / this.state.perPage),
+            tableData: slice,
+        });
     }
 
-    componentDidMount(){
+    componentDidMount() {
         this.getData("");
         this.getClientes("");
     }
 
-    componentDidUpdate() {
-    }
+    componentDidUpdate() {}
 
-    componentWillUnmount(){
-    }
+    componentWillUnmount() {}
 
     getData(valor) {
-        fetch('http://localhost:3000/api/veiculos/'+valor,
-        {
+        fetch("/api/api/veiculos/" + valor, {
             headers: {
-                    'Authorization': 'Bearer ' + localStorage.getItem('token'),
-            }
+                Authorization: "Bearer " + localStorage.getItem("token"),
+            },
         })
-        .then(resposta => resposta.json())
-        .then(dados => {
-            const veiculos = dados.result;
-            var slice = veiculos.slice(this.state.offset, this.state.offset + this.state.perPage)
-            this.setState(() => {
-                return {
-                pageCount: Math.ceil(veiculos.length / this.state.perPage),
-                orgtableData : veiculos,
-                tableData:slice
-                }
+            .then((resposta) => resposta.json())
+            .then((dados) => {
+                const veiculos = dados.result;
+                var slice = veiculos.slice(
+                    this.state.offset,
+                    this.state.offset + this.state.perPage
+                );
+                this.setState(() => {
+                    return {
+                        pageCount: Math.ceil(
+                            veiculos.length / this.state.perPage
+                        ),
+                        orgtableData: veiculos,
+                        tableData: slice,
+                    };
+                });
             });
-        });
     }
 
-    getClientes(valor){
-        fetch('http://localhost:3000/api/clientes/'+valor,
-        {
+    getClientes(valor) {
+        fetch("/api/api/clientes/" + valor, {
             headers: {
-                    'Authorization': 'Bearer ' + localStorage.getItem('token'),
-            }
+                Authorization: "Bearer " + localStorage.getItem("token"),
+            },
         })
-        .then(resposta => resposta.json())
-        .then(dados => {
-            const clientes = dados.result;
-            this.setState(() => {
-                return {
-                clientes: clientes
-                }
+            .then((resposta) => resposta.json())
+            .then((dados) => {
+                const clientes = dados.result;
+                this.setState(() => {
+                    return {
+                        clientes: clientes,
+                    };
+                });
             });
-        });
     }
 
     deletarVeiculo = (placaVeiculo) => {
-        fetch("http://localhost:3000/api/veiculo/"+placaVeiculo, {method: 'DELETE',
-        headers: {
-            'Authorization': 'Bearer ' + localStorage.getItem('token'),
-    }})
-        .then(resposta => {
-            if(resposta.ok){
+        fetch("/api/api/veiculo/" + placaVeiculo, {
+            method: "DELETE",
+            headers: {
+                Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+        }).then((resposta) => {
+            if (resposta.ok) {
                 this.getData("");
             } else {
-                alert("Não foi possível deletar o Veículo.")
+                alert("Não foi possível deletar o Veículo.");
             }
-        })
-        this.fecharModalExcluir()
-        this.fecharModalDetalhar()
-    }
+        });
+        this.fecharModalExcluir();
+        this.fecharModalDetalhar();
+    };
 
     incluirVeiculo = (veiculo) => {
-        fetch("http://localhost:3000/api/veiculo", {
-            method: 'POST',
-            headers: {'Content-Type':'application/x-www-form-urlencoded',
-            'Authorization': 'Bearer ' + localStorage.getItem('token'),},
-            body: qs.stringify(veiculo)
-        })
-        .then(resposta => {
-            if(resposta.ok){
+        fetch("/api/api/veiculo", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+            body: qs.stringify(veiculo),
+        }).then((resposta) => {
+            if (resposta.ok) {
                 this.getData("");
             } else {
-                alert('Não foi possível incluir o Veiculo!')
+                alert("Não foi possível incluir o Veiculo!");
             }
-        })
-        this.fecharModalIncluir()
-    }
+        });
+        this.fecharModalIncluir();
+    };
 
     atualizarVeiculo = (veiculo) => {
-        fetch("http://localhost:3000/api/veiculo/"+veiculo.placaVeiculo, {
-            method: 'PUT',
-            headers: {'Content-Type':'application/x-www-form-urlencoded',
-            'Authorization': 'Bearer ' + localStorage.getItem('token'),},
-            body: qs.stringify(veiculo)
-        })
-        .then(resposta => {
-            if(resposta.ok){
+        fetch("/api/api/veiculo/" + veiculo.placaVeiculo, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+            body: qs.stringify(veiculo),
+        }).then((resposta) => {
+            if (resposta.ok) {
                 this.getData("");
             } else {
-                alert('Não foi possível atualizar o Veiculo!')
+                alert("Não foi possível atualizar o Veiculo!");
             }
-        })
-        this.fecharModalDetalhar()
-    }
+        });
+        this.fecharModalDetalhar();
+    };
 
     fecharModalIncluir = () => {
-        this.setState(
-            {
-                modalIncluir:false
-            }
-        )
-        this.zerarVeiculoState()
-
-    }
+        this.setState({
+            modalIncluir: false,
+        });
+        this.zerarVeiculoState();
+    };
 
     abrirModalIncluir = () => {
-        this.setState(
-            {
-                modalIncluir:true,
-            }
-        )
-        this.zerarVeiculoState()
-    }
+        this.setState({
+            modalIncluir: true,
+        });
+        this.zerarVeiculoState();
+    };
 
     fecharModalExcluir = () => {
-        this.setState(
-            {
-                modalExcluir:false
-            }
-        )
-    }
+        this.setState({
+            modalExcluir: false,
+        });
+    };
 
     abrirModalExcluir = () => {
-        this.setState(
-            {
-                modalExcluir:true,
-            }
-        )
-    }
+        this.setState({
+            modalExcluir: true,
+        });
+    };
 
     fecharModalDetalhar = () => {
-        this.setState(
-            {
-                modalDetalhar:false,
-                input: false
-            }
-        )
-        this.zerarVeiculoState()
-    }
+        this.setState({
+            modalDetalhar: false,
+            input: false,
+        });
+        this.zerarVeiculoState();
+    };
 
     abrirModalDetalhar = (veiculo) => {
-        this.setState(
-            {
-                modalDetalhar:true,
-                placa: veiculo.placaVeiculo,
-                marca: veiculo.marca,
-                modelo: veiculo.modelo,
-                ano: veiculo.ano,
-                capacidadeOleo: veiculo.capacidadeOleo,
-                cor: veiculo.cor,
-                idCliente:veiculo.veiculo_idCliente,
-                nomeCliente: veiculo.nomeCliente,
-                celularCliente: veiculo.celularCliente,
-                input: true,
-            }
-        )
-    }
+        this.setState({
+            modalDetalhar: true,
+            placa: veiculo.placaVeiculo,
+            marca: veiculo.marca,
+            modelo: veiculo.modelo,
+            ano: veiculo.ano,
+            capacidadeOleo: veiculo.capacidadeOleo,
+            cor: veiculo.cor,
+            idCliente: veiculo.veiculo_idCliente,
+            nomeCliente: veiculo.nomeCliente,
+            celularCliente: veiculo.celularCliente,
+            input: true,
+        });
+    };
 
     atualizaPlaca = (e) => {
-        this.setState(
-            {
-                placa: e.target.value
-            }
-        )
-    }
+        this.setState({
+            placa: e.target.value,
+        });
+    };
 
     atualizaMarca = (e) => {
-        this.setState(
-            {
-                marca: e.target.value
-            }
-        )
-    }
+        this.setState({
+            marca: e.target.value,
+        });
+    };
 
     atualizaModelo = (e) => {
-        this.setState(
-            {
-                modelo: e.target.value
-            }
-        )
-    }
+        this.setState({
+            modelo: e.target.value,
+        });
+    };
 
     atualizaAno = (e) => {
-        this.setState(
-            {
-                ano: e.target.value
-            }
-        )
-    }
+        this.setState({
+            ano: e.target.value,
+        });
+    };
 
     atualizaCapacidadeOleo = (e) => {
-        this.setState(
-            {
-                capacidadeOleo: e.target.value
-            }
-        )
-    }
+        this.setState({
+            capacidadeOleo: e.target.value,
+        });
+    };
 
     atualizaCor = (e) => {
-        this.setState(
-            {
-                cor: e.target.value
-            }
-        )
-    }
+        this.setState({
+            cor: e.target.value,
+        });
+    };
 
     atualizaVeiculo_idCliente = (e) => {
-        this.setState( () => 
-            {
-                return{
-                    idCliente: e
-                }
-            }
-        )
-    }
+        this.setState(() => {
+            return {
+                idCliente: e,
+            };
+        });
+    };
 
     atualizaInput = () => {
-        this.setState(
-            {
-                input: false
-            }
-        )
-    }
+        this.setState({
+            input: false,
+        });
+    };
 
-    atualizaCamposAC = (cliente) => {      
-        const valor = (cliente.target.value);
+    atualizaCamposAC = (cliente) => {
+        const valor = cliente.target.value;
         const campos = valor.split(" - ");
-        this.setState(
-            {
-                idCliente: campos[0],
-                nomeCliente: campos[1],
-                celularCliente: campos[2]
-            }
-        )
-    }
+        this.setState({
+            idCliente: campos[0],
+            nomeCliente: campos[1],
+            celularCliente: campos[2],
+        });
+    };
 
     incluir = () => {
         const veiculo = {
-                placaVeiculo: this.state.placa,
-                marca: this.state.marca,
-                modelo: this.state.modelo,
-                ano: this.state.ano,
-                capacidadeOleo: this.state.capacidadeOleo,
-                cor: this.state.cor,
-                veiculo_idCliente:this.state.idCliente,
-    }
-    this.incluirVeiculo(veiculo)
-    }
+            placaVeiculo: this.state.placa,
+            marca: this.state.marca,
+            modelo: this.state.modelo,
+            ano: this.state.ano,
+            capacidadeOleo: this.state.capacidadeOleo,
+            cor: this.state.cor,
+            veiculo_idCliente: this.state.idCliente,
+        };
+        this.incluirVeiculo(veiculo);
+    };
 
     salvar = () => {
         const veiculo = {
@@ -331,58 +309,84 @@ class Veiculos extends React.Component {
             ano: this.state.ano,
             capacidadeOleo: this.state.capacidadeOleo,
             cor: this.state.cor,
-            veiculo_idCliente:this.state.idCliente,
-}
-            this.atualizarVeiculo(veiculo)
-    }
+            veiculo_idCliente: this.state.idCliente,
+        };
+        this.atualizarVeiculo(veiculo);
+    };
 
     zerarVeiculoState = () => {
-        this.setState(
-            {
-            placa: '',
-            marca: '',
-            modelo: '',
+        this.setState({
+            placa: "",
+            marca: "",
+            modelo: "",
             ano: null,
             capacidadeOleo: null,
-            cor: '',
-            nomeCliente: '',
-            celularCliente: '',
-            idCliente:0,
-            }
-        )
-    }
+            cor: "",
+            nomeCliente: "",
+            celularCliente: "",
+            idCliente: 0,
+        });
+    };
 
     handleChange = (e) => {
-        if(!e.target.value){
-        this.getData("");
-            return
+        if (!e.target.value) {
+            this.getData("");
+            return;
         }
 
         this.getData(e.target.value);
-    }
+    };
 
-    render(){
-        return(
+    render() {
+        return (
             <div className="container">
-                <Header state={this.state} handleChange={this.handleChange} abrirModalIncluir={this.abrirModalIncluir} />
-                <Listagem state={this.state} abrirModalDetalhar={this.abrirModalDetalhar}/>
-                <ModalIncluir state={this.state} fecharModalIncluir={this.fecharModalIncluir}
-                incluir={this.incluir} atualizaPlaca={this.atualizaPlaca} atualizaMarca={this.atualizaMarca}
-                atualizaModelo={this.atualizaModelo} atualizaAno={this.atualizaAno}
-                atualizaCapacidadeOleo={this.atualizaCapacidadeOleo} atualizaCor={this.atualizaCor}
-                atualizaCamposAC={this.atualizaCamposAC} />
-                <ModalDetalhar  state={this.state} fecharModalDetalhar={this.fecharModalDetalhar}
-                salvar={this.salvar} atualizaPlaca={this.atualizaPlaca} 
-                atualizaMarca={this.atualizaMarca} atualizaModelo={this.atualizaModelo}
-                atualizaAno={this.atualizaAno} atualizaCapacidadeOleo={this.atualizaCapacidadeOleo}
-                atualizaCor={this.atualizaCor} atualizaCamposAC={this.atualizaCamposAC}
-                abrirModalExcluir={this.abrirModalExcluir} atualizaInput={this.atualizaInput}  />
-                <ModalExcluir state={this.state} fecharModalExcluir={this.fecharModalExcluir} deletarVeiculo={this.deletarVeiculo} />
-                <Paginator state={this.state} handlePageClick={this.handlePageClick}/>
+                <Header
+                    state={this.state}
+                    handleChange={this.handleChange}
+                    abrirModalIncluir={this.abrirModalIncluir}
+                />
+                <Listagem
+                    state={this.state}
+                    abrirModalDetalhar={this.abrirModalDetalhar}
+                />
+                <ModalIncluir
+                    state={this.state}
+                    fecharModalIncluir={this.fecharModalIncluir}
+                    incluir={this.incluir}
+                    atualizaPlaca={this.atualizaPlaca}
+                    atualizaMarca={this.atualizaMarca}
+                    atualizaModelo={this.atualizaModelo}
+                    atualizaAno={this.atualizaAno}
+                    atualizaCapacidadeOleo={this.atualizaCapacidadeOleo}
+                    atualizaCor={this.atualizaCor}
+                    atualizaCamposAC={this.atualizaCamposAC}
+                />
+                <ModalDetalhar
+                    state={this.state}
+                    fecharModalDetalhar={this.fecharModalDetalhar}
+                    salvar={this.salvar}
+                    atualizaPlaca={this.atualizaPlaca}
+                    atualizaMarca={this.atualizaMarca}
+                    atualizaModelo={this.atualizaModelo}
+                    atualizaAno={this.atualizaAno}
+                    atualizaCapacidadeOleo={this.atualizaCapacidadeOleo}
+                    atualizaCor={this.atualizaCor}
+                    atualizaCamposAC={this.atualizaCamposAC}
+                    abrirModalExcluir={this.abrirModalExcluir}
+                    atualizaInput={this.atualizaInput}
+                />
+                <ModalExcluir
+                    state={this.state}
+                    fecharModalExcluir={this.fecharModalExcluir}
+                    deletarVeiculo={this.deletarVeiculo}
+                />
+                <Paginator
+                    state={this.state}
+                    handlePageClick={this.handlePageClick}
+                />
             </div>
-        )
+        );
     }
-
 }
 
 export default Veiculos;
