@@ -9,7 +9,6 @@ const connectionDB = require("./api/middleware/connectionDB");
 const auth = require("./api/middleware/auth");
 // dados.inserirDados();
 const app = express();
-
 const routes = require("./api/routes/routes");
 
 app.use(cors());

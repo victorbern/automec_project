@@ -84,7 +84,7 @@ class Clientes extends React.Component {
     componentWillUnmount() {}
 
     getData(valor) {
-        fetch("http://localhost:3000/api/clientes/" + valor, {
+        fetch("/api/api/clientes/" + valor, {
             headers: {
                 Authorization: "Bearer " + localStorage.getItem("token"),
             },
@@ -109,7 +109,7 @@ class Clientes extends React.Component {
     }
 
     deletarCliente = (id) => {
-        fetch("http://localhost:3000/api/cliente/" + id, {
+        fetch("/api/api/cliente/" + id, {
             method: "DELETE",
             headers: {
                 Authorization: "Bearer " + localStorage.getItem("token"),
@@ -128,7 +128,7 @@ class Clientes extends React.Component {
     };
 
     incluirCliente = (cliente) => {
-        fetch("http://localhost:3000/api/cliente", {
+        fetch("/api/api/cliente", {
             method: "POST",
             headers: {
                 Authorization: "Bearer " + localStorage.getItem("token"),
@@ -146,7 +146,7 @@ class Clientes extends React.Component {
     };
 
     atualizarCliente = (cliente) => {
-        fetch("http://localhost:3000/api/cliente/" + cliente.idCliente, {
+        fetch("/api/api/cliente/" + cliente.idCliente, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
