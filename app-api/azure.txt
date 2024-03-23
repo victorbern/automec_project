@@ -1,4 +1,0 @@
-DB_HOST=automec-db.mysql.database.azure.com
-DB_USER=automec@automec-db
-DB_PASS=KLV_2022
-DB_NAME=automec_v7
